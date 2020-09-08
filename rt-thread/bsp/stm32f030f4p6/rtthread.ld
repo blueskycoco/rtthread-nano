@@ -29,7 +29,7 @@ _estack = 0x20000FFF;    /* end of RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0;/*0x400;      /* required amount of heap  */
-_Min_Stack_Size = 0x200; /* required amount of stack */
+_Min_Stack_Size = 0x100; /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
@@ -101,6 +101,18 @@ SECTIONS
     KEEP (*(SORT(.fini_array.*)))
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
+  } >FLASH
+  .rti_array :
+  {
+    PROVIDE_HIDDEN (__rti_array_start = .);
+    KEEP (*(SORT(.rti_fn*)))
+    PROVIDE_HIDDEN (__rti_array_end = .);
+    PROVIDE_HIDDEN (__fsymtab_start = .);
+    KEEP (*(FSymTab))
+    PROVIDE_HIDDEN (__fsymtab_end = .);
+    PROVIDE_HIDDEN (__vsymtab_start = .);
+    KEEP (*(VSymTab))
+    PROVIDE_HIDDEN (__vsymtab_end = .);
   } >FLASH
 
   /* used by the startup to initialize data */

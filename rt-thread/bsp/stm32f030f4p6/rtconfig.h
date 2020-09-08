@@ -119,7 +119,7 @@
 //  <i>Default: 128  (128Byte)
 #define RT_CONSOLEBUF_SIZE          128
 // </h>
-
+#define RTE_USING_FINSH
 #if defined(RTE_USING_FINSH)
     #define RT_USING_FINSH
     #define FINSH_USING_MSH

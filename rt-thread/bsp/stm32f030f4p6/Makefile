@@ -113,6 +113,9 @@ ${COMPILER}/rtthread.axf: ${COMPILER}/object.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/scheduler.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/thread.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/timer.o
+${COMPILER}/rtthread.axf: ${COMPILER}/cmd.o
+${COMPILER}/rtthread.axf: ${COMPILER}/msh.o
+${COMPILER}/rtthread.axf: ${COMPILER}/shell.o
 ${COMPILER}/rtthread.axf: rtthread.ld
 SCATTERgcc_rtthread=rtthread.ld
 ENTRY_rtthread=Reset_Handler
