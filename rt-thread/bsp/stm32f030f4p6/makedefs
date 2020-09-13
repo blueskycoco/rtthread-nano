@@ -149,7 +149,7 @@ else
 CFLAGS+=-Os
 endif
 
-
+#VERBOSE = 1 
 #
 # Add the tool specific CFLAGS.
 #
