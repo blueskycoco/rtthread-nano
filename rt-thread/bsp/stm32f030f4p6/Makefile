@@ -35,13 +35,13 @@ include ${ROOT}/makedefs
 #
 # Where to find header files that do not live in the source directory.
 #
-IPATH = ./
+IPATH = .
 IPATH += ./libraries/inc
 IPATH += ../../include
 IPATH += ../../components/finsh
 
-VPATH =./
-VPATH += libraries
+VPATH = .
+VPATH += ./libraries
 VPATH += ../../src
 VPATH += ../../components/finsh
 VPATH += ../../libcpu/arm/cortex-m0
