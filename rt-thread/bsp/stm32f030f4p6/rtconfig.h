@@ -78,11 +78,11 @@
 // </c>
 // <c1>Using Mutex
 //  <i>Using Mutex
-//#define RT_USING_MUTEX
+#define RT_USING_MUTEX
 // </c>
 // <c1>Using Event
 //  <i>Using Event
-//#define RT_USING_EVENT
+#define RT_USING_EVENT
 // </c>
 // <c1>Using MailBox
 //  <i>Using MailBox
@@ -119,7 +119,7 @@
 //  <i>Default: 128  (128Byte)
 #define RT_CONSOLEBUF_SIZE          128
 // </h>
-#define RTE_USING_FINSH
+//#define RTE_USING_FINSH
 #if defined(RTE_USING_FINSH)
     #define RT_USING_FINSH
     #define FINSH_USING_MSH
@@ -133,7 +133,7 @@
     // <o>the stack of finsh thread <1-4096>
     //  <i>the stack of finsh thread
     //  <i>Default: 4096  (4096Byte)
-    #define FINSH_THREAD_STACK_SIZE     1024
+    #define FINSH_THREAD_STACK_SIZE     512//1024
     // <o>the history lines of finsh thread <1-32>
     //  <i>the history lines of finsh thread
     //  <i>Default: 5
