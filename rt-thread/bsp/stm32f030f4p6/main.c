@@ -33,7 +33,7 @@ int main(void)
     {
 	GPIO_ResetBits(GPIOB,GPIO_Pin_1);
         rt_thread_mdelay(500);
-//	rt_kprintf("led on\r\n");        
+//	rt_kprintf("led1 on\r\n");        
 	GPIO_SetBits(GPIOB,GPIO_Pin_1);
         rt_thread_mdelay(500);
 //	rt_kprintf("led off\r\n");        
