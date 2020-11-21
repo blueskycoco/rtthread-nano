@@ -10,7 +10,14 @@
 
 #include <rtthread.h>
 #include <stm32f0xx.h>
+#include "wifi.h"
 
+uint8_t cmd[32] = {"AT+WMODE\n"};
+uint8_t e[32] = {"AT+E\n"};
+uint8_t rsp[32] = {0};
+uint8_t plus[] = {"+++"};
+uint8_t a[] = {"a"};
+uint8_t len = 0;
 void led_init()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -29,14 +36,27 @@ int main(void)
 {
 
     led_init();
-    while (1)
+/*	wifi_tx(plus, 3);
+    rt_thread_mdelay(100);
+    wifi_tx(a, 1);
+    //wifi_rx(rsp);
+	len = 0;*/
+//	wifi_tx(e, sizeof(e));
+	while (1)
     {
-	GPIO_ResetBits(GPIOB,GPIO_Pin_1);
-        rt_thread_mdelay(500);
-//	rt_kprintf("led1 on\r\n");        
-	GPIO_SetBits(GPIOB,GPIO_Pin_1);
-        rt_thread_mdelay(500);
-//	rt_kprintf("led off\r\n");        
+		wifi_tx(cmd, sizeof(cmd));
+		len = wifi_rx(rsp);
+		if (rt_strstr((const char *)rsp, "STA") != RT_NULL) {
+			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
+        	rt_thread_mdelay(500);
+			GPIO_SetBits(GPIOB,GPIO_Pin_1);
+        	rt_thread_mdelay(500);
+		} else {
+			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
+        	rt_thread_mdelay(50);
+			GPIO_SetBits(GPIOB,GPIO_Pin_1);
+        	rt_thread_mdelay(50);
+		}
     }
 }
 

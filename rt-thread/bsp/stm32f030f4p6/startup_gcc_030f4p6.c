@@ -32,7 +32,6 @@
 //*****************************************************************************
 void Reset_Handler(void);
 static void NmiSR(void);
-static void FaultISR(void);
 static void IntDefaultHandler(void);
 static void SVC_Handler(void);
 extern void EXTI4_15_IRQHandler(void);
@@ -70,50 +69,51 @@ void (* const g_pfnVectors[])(void) =
 {
 	(void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
 	// The initial stack pointer
-	Reset_Handler,                               // The reset handler
-	NmiSR,                                  // The NMI handler
-	HardFault_Handler,                               // The hard fault handler
-	0,                      				// The MPU fault handler
-	0,                      				// The bus fault handler
-	0,                     					// The usage fault handler
-	0,                                      // Reserved
-	0,                                      // Reserved
-	0,                                      // Reserved
-	0,                                      // Reserved
-	SVC_Handler,                      		// SVCall handler
-	0,                      	// Debug monitor handler
-	0,                                      // Reserved
-	PendSV_Handler,    //	PendSV_Handler
-	SysTick_Handler,    //	SysTick_Handler
-	IntDefaultHandler,    //	WWDG_IRQHandler
-	0,    
-	IntDefaultHandler,    //	RTC_IRQHandler
-	IntDefaultHandler,    //	FLASH_IRQHandler
-	IntDefaultHandler,    //	RCC_IRQHandler
-	IntDefaultHandler,    //	EXTI0_1_IRQHandler
-	IntDefaultHandler,    //	EXTI2_3_IRQHandler
-	IntDefaultHandler,    //	EXTI4_15_IRQHandler
-	0,    
-	IntDefaultHandler,    //	DMA1_Channel1_IRQHandler
-	IntDefaultHandler,    //	DMA1_Channel2_3_IRQHandler
-	IntDefaultHandler,    //	DMA1_Channel4_5_IRQHandler
-	IntDefaultHandler,    //	ADC1_IRQHandler
-	IntDefaultHandler,    //	TIM1_BRK_IRQHandler
-	IntDefaultHandler,    //	TIM1_CC_IRQHandler
-	0,    
-	IntDefaultHandler,    //	TIM3_IRQHandler
-	0,    
-	0,    
-	IntDefaultHandler,    //	TIM14_IRQHandler
-	IntDefaultHandler,    //	TIM15_IRQHandler
-	IntDefaultHandler,    //	TIM16_IRQHandler
-	IntDefaultHandler,    //	TIM17_IRQHandler
-	IntDefaultHandler,    //	I2C1_IRQHandler
-	IntDefaultHandler,    //	I2C2_IRQHandler
-	IntDefaultHandler,    //	SPI1_IRQHandler
-	IntDefaultHandler,    //	SPI2_IRQHandler
-	IntDefaultHandler,    //	SPI2_IRQHandler
-	IntDefaultHandler,    //	USART2_IRQHandler
+	Reset_Handler,                          //  The reset handler
+	NmiSR,                                  //  The NMI handler
+	HardFault_Handler,                      //  The hard fault handler
+	0,                      				//  Reserved
+	0,                      				//  Reserved
+	0,                     					//  Reserved
+	0,                                      //  Reserved
+	0,                                      //  Reserved
+	0,                                      //  Reserved
+	0,                                      //  Reserved
+	SVC_Handler,                      		//  SVCall handler
+	0,                      				//  Reserved
+	0,                                      //  Reserved
+	PendSV_Handler,    						//	PendSV_Handler
+	SysTick_Handler,    					//	SysTick_Handler
+
+	IntDefaultHandler,    					//	WWDG_IRQHandler
+	0,										//  Reserved
+	IntDefaultHandler,    					//	RTC_IRQHandler
+	IntDefaultHandler,    					//	FLASH_IRQHandler
+	IntDefaultHandler,    					//	RCC_IRQHandler
+	IntDefaultHandler,    					//	EXTI0_1_IRQHandler
+	IntDefaultHandler,    					//	EXTI2_3_IRQHandler
+	IntDefaultHandler,    					//	EXTI4_15_IRQHandler
+	0,    									//  Reserved
+	IntDefaultHandler,    					//	DMA1_Channel1_IRQHandler
+	IntDefaultHandler,    					//	DMA1_Channel2_3_IRQHandler
+	IntDefaultHandler,    					//	DMA1_Channel4_5_IRQHandler
+	IntDefaultHandler,    					//	ADC1_IRQHandler
+	IntDefaultHandler,    					//	TIM1_BRK_IRQHandler
+	IntDefaultHandler,    					//	TIM1_CC_IRQHandler
+	0,    									//  Reserved
+	IntDefaultHandler,    					//	TIM3_IRQHandler
+	0,    									//  Reserved
+	0,    									//  Reserved
+	IntDefaultHandler,    					//	TIM14_IRQHandler
+	IntDefaultHandler,    					//	TIM15_IRQHandler
+	IntDefaultHandler,    					//	TIM16_IRQHandler
+	IntDefaultHandler,    					//	TIM17_IRQHandler
+	IntDefaultHandler,    					//	I2C1_IRQHandler
+	IntDefaultHandler,    					//	I2C2_IRQHandler
+	IntDefaultHandler,    					//	SPI1_IRQHandler
+	IntDefaultHandler,    					//	SPI2_IRQHandler
+	USART1_IRQHandler,    					//	USART1_IRQHandler
+	IntDefaultHandler,    					//	USART2_IRQHandler
 	0,
 	0,
 	0,
