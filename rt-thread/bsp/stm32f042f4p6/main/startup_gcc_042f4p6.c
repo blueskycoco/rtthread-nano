@@ -39,6 +39,7 @@ extern void USART1_IRQHandler(void);
 extern void SysTick_Handler(void);
 extern void PendSV_Handler(void);
 extern void HardFault_Handler(void);
+extern void USB_IRQHandler(void);
 //*****************************************************************************
 //
 // External declaration for the interrupt handler used by the application.
@@ -69,21 +70,21 @@ void (* const g_pfnVectors[])(void) =
 {
 	(void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)),
 	// The initial stack pointer
-	Reset_Handler,                               // The reset handler
-	NmiSR,                                  // The NMI handler
-	HardFault_Handler,                               // The hard fault handler
-	0,                      				// The MPU fault handler
-	0,                      				// The bus fault handler
-	0,                     					// The usage fault handler
-	0,                                      // Reserved
-	0,                                      // Reserved
-	0,                                      // Reserved
-	0,                                      // Reserved
-	SVC_Handler,                      		// SVCall handler
-	0,                      	// Debug monitor handler
-	0,                                      // Reserved
-	PendSV_Handler,    //	PendSV_Handler
-	SysTick_Handler,    //	SysTick_Handler
+	Reset_Handler,        // 	The reset handler
+	NmiSR,                // 	The NMI handler
+	HardFault_Handler,    // 	The hard fault handler
+	0,                    // 	The MPU fault handler
+	0,                    // 	The bus fault handler
+	0,                    // 	The usage fault handler
+	0,                    // 	Reserved
+	0,                    // 	Reserved
+	0,                    // 	Reserved
+	0,                    // 	Reserved
+	SVC_Handler,          // 	SVCall handler
+	0,                    // 	Debug monitor handler
+	0,                    //        Reserved
+	PendSV_Handler,       //	PendSV_Handler
+	SysTick_Handler,      //	SysTick_Handler
 	IntDefaultHandler,    //	WWDG_IRQHandler
 	0,    
 	IntDefaultHandler,    //	RTC_IRQHandler
@@ -114,8 +115,8 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	SPI2_IRQHandler
 	IntDefaultHandler,    //	USART2_IRQHandler
 	0,
-	IntDefaultHandler,	//	CEC_CAN
-	IntDefaultHandler,	//	USB
+	IntDefaultHandler,    //	CEC_CAN
+	USB_IRQHandler,	      //	USB
 	BootRAM
 };
 
