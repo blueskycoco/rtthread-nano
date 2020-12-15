@@ -85,12 +85,14 @@ ${COMPILER}:
 ${COMPILER}/rtthread.axf: ${COMPILER}/startup_${COMPILER}_042f4p6.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/system_stm32f0xx.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/main.o
+${COMPILER}/rtthread.axf: ${COMPILER}/imu.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/board.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32_it.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usb_bsp.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_desc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_pwr.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_usr.o
+#${COMPILER}/rtthread.axf: ${COMPILER}/usb_bsp.o
+#${COMPILER}/rtthread.axf: ${COMPILER}/usbd_desc.o
+#${COMPILER}/rtthread.axf: ${COMPILER}/usbd_pwr.o
+#${COMPILER}/rtthread.axf: ${COMPILER}/usbd_usr.o
+${COMPILER}/rtthread.axf: ${COMPILER}/imu_jump_detection.o
 #driver
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_gpio.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_misc.o
@@ -146,7 +148,6 @@ SCATTERgcc_rtthread=rtthread.ld
 ENTRY_rtthread=Reset_Handler
 #CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F10X_HD -DMASTER
 CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F042
-CFLAGSgcc+=-DDEBUG
 #
 # Include the automatically generated dependency files.
 #

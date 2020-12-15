@@ -69,7 +69,19 @@ void NMI_Handler(void)
 void SVC_Handler(void)
 {
 }
-
+void EXTI0_1_IRQHandler(void)
+{
+	extern void imu_isr(void);
+	/* enter interrupt */
+	rt_interrupt_enter();
+	if(EXTI_GetITStatus(EXTI_Line1))
+	{	 
+		imu_isr();	
+		EXTI_ClearITPendingBit(EXTI_Line1);
+	}
+	/* leave interrupt */
+	rt_interrupt_leave();
+}
 /**
   * @brief  This function handles PendSVC exception.
   * @param  None

@@ -40,6 +40,7 @@ extern void SysTick_Handler(void);
 extern void PendSV_Handler(void);
 extern void HardFault_Handler(void);
 extern void USB_IRQHandler(void);
+extern void EXTI0_1_IRQHandler(void);
 //*****************************************************************************
 //
 // External declaration for the interrupt handler used by the application.
@@ -90,7 +91,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	RTC_IRQHandler
 	IntDefaultHandler,    //	FLASH_IRQHandler
 	IntDefaultHandler,    //	RCC_IRQHandler
-	IntDefaultHandler,    //	EXTI0_1_IRQHandler
+	EXTI0_1_IRQHandler,    //	EXTI0_1_IRQHandler
 	IntDefaultHandler,    //	EXTI2_3_IRQHandler
 	IntDefaultHandler,    //	EXTI4_15_IRQHandler
 	0,    
@@ -116,7 +117,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	USART2_IRQHandler
 	0,
 	IntDefaultHandler,    //	CEC_CAN
-	USB_IRQHandler,	      //	USB
+	IntDefaultHandler,	      //	USB
 	BootRAM
 };
 
