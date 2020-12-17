@@ -150,8 +150,8 @@ uint8_t inv_serif_read_1B(uint8_t reg_addr)
 void ICM4x6xx_init(uint8_t *chip_id)
 {
 	*chip_id = inv_serif_read_1B(0x75);
-	inv_serif_write_1B(0x6b, 0x00);
-	rt_thread_mdelay(100);
+	//inv_serif_write_1B(0x6b, 0x00);	
+	//rt_thread_mdelay(100);
 	inv_serif_write_1B(0x6c, 0x00);
 	uint8_t gyro = inv_serif_read_1B(0x1b);
 	gyro = gyro & 0xe7;
@@ -161,10 +161,10 @@ void ICM4x6xx_init(uint8_t *chip_id)
 	accel = accel & 0xe7;
 	accel = accel | (3 << 3);
 	inv_serif_write_1B(0x1c, accel);
-	inv_serif_write_1B(0x1d, 0x06);//0x06
+	inv_serif_write_1B(0x1d, 0x07);//0x06
 	inv_serif_write_1B(0x19, 0);
 	inv_serif_write_1B(0x1a, 0x05);
-	inv_serif_write_1B(0x38, 0x07);
+	inv_serif_write_1B(0x38, 0x01);
 	
 }
 void init_imu()
