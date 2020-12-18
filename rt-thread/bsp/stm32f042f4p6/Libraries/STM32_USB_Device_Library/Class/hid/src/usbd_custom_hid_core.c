@@ -86,7 +86,7 @@ USBD_Class_cb_TypeDef  USBD_HID_cb =
   
 
 
-uint8_t Report_buf[2];
+uint8_t Report_buf[64];
 uint8_t USBD_HID_Report_ID=0;
 uint8_t flag = 0;
 extern uint8_t PrevXferDone;
@@ -157,8 +157,27 @@ const uint8_t USBD_HID_CfgDesc[CUSTOMHID_SIZ_CONFIG_DESC] =
   0x20,	/* bInterval: Polling Interval (20 ms) */
   /* 41 */
 } ;
-
 const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
+{
+    0x05,0x01,                      /* Usage Page (Generic Desktop) */ 
+    0x09,0x02,                      /* Usage (Mouse) */ 
+	0xA1,0x01,                      /* Collection (Application) */
+
+	    0x09,0x01,                      /* Usage (Pointer) */
+	    0xA1,0x00,                      /* Collection (Physical) */
+	    0x85, 0x01,
+	    0x95, 0x40,
+	    0x75, 0x08,
+	    0x09, 0x3a,
+	    0x15, 0x00,
+	    0x26, 0xff, 0x00,
+	    0x81, 0x02,
+    	0xC0,                           /* End Collection */
+
+    0xC0                            /* End Collection */
+};
+#if 0
+const uint8_t CustomHID_ReportDescriptor1[CUSTOMHID_SIZ_REPORT_DESC] =
 {
   0x06, 0xFF, 0x00,      /* USAGE_PAGE (Vendor Page: 0xFF00) */                       
   0x09, 0x01,            /* USAGE (Demo Kit)               */    
@@ -275,7 +294,7 @@ const uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
   
   0xc0 	          /*     END_COLLECTION	             */
 }; /* CustomHID_ReportDescriptor */
-
+#endif
 /* Private function ----------------------------------------------------------*/ 
 /**
   * @brief  USBD_HID_Init
@@ -303,7 +322,7 @@ uint8_t  USBD_HID_Init (void  *pdev,
               USB_EP_INT);
  
   /*Receive Data*/
-  DCD_EP_PrepareRx(pdev,HID_OUT_EP,Report_buf,2);
+  DCD_EP_PrepareRx(pdev,HID_OUT_EP,Report_buf,64);
   
   return USBD_OK;
 }
@@ -537,7 +556,7 @@ uint8_t  USBD_HID_DataOut (void  *pdev,
   }
   
 #endif
-  DCD_EP_PrepareRx(pdev,HID_IN_EP,Report_buf,2);
+  DCD_EP_PrepareRx(pdev,HID_IN_EP,Report_buf,64);
   
   return USBD_OK;
 }

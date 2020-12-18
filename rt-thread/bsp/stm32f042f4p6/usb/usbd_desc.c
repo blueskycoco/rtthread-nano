@@ -30,13 +30,13 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define USBD_VID                     0x0483
-#define USBD_PID                     0x5750
+#define USBD_VID                     0x3318
+#define USBD_PID                     0x0003
 
 #define USBD_LANGID_STRING            0x409
-#define USBD_MANUFACTURER_STRING      "STMicroelectronics"
+#define USBD_MANUFACTURER_STRING      "Nreal"
 
-#define USBD_PRODUCT_FS_STRING        "Custome HID"
+#define USBD_PRODUCT_FS_STRING        "IMU"
 
 #define USBD_CONFIGURATION_FS_STRING  "HID Config"
 #define USBD_INTERFACE_FS_STRING      "HID Interface"
