@@ -117,7 +117,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	USART2_IRQHandler
 	0,
 	IntDefaultHandler,    //	CEC_CAN
-	USB_IRQHandler,	      //	USB
+	IntDefaultHandler,	      //	USB
 	BootRAM
 };
 

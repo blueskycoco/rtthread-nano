@@ -150,8 +150,8 @@ uint8_t inv_serif_read_1B(uint8_t reg_addr)
 void ICM4x6xx_init(uint8_t *chip_id)
 {
 	*chip_id = inv_serif_read_1B(0x75);
-	//inv_serif_write_1B(0x6b, 0x00);	
-	//rt_thread_mdelay(100);
+	inv_serif_write_1B(0x6b, 0x00);	
+	rt_thread_mdelay(100);
 	inv_serif_write_1B(0x6c, 0x00);
 	uint8_t gyro = inv_serif_read_1B(0x1b);
 	gyro = gyro & 0xe7;
@@ -161,17 +161,22 @@ void ICM4x6xx_init(uint8_t *chip_id)
 	accel = accel & 0xe7;
 	accel = accel | (3 << 3);
 	inv_serif_write_1B(0x1c, accel);
-	inv_serif_write_1B(0x1d, 0x07);//0x06
+	inv_serif_write_1B(0x1d, 0x06);//0x06
 	inv_serif_write_1B(0x19, 0);
-	inv_serif_write_1B(0x1a, 0x05);
+	inv_serif_write_1B(0x1a, 0x06);
 	inv_serif_write_1B(0x38, 0x01);
 	
 }
+#define ACC 0
 void init_imu()
 {
 	uint8_t chip;
     	rt_sem_init(&imu_sem, "shrx", 0, 0);
+#if ACC 
     	imu_jump_detection_init(1.0f);
+#else
+    	imu_gyro_jump_detection_init(0.051f);
+#endif
 	init_spi();
 	init_irq();
 	ICM4x6xx_init(&chip);
@@ -182,27 +187,40 @@ uint8_t get_imu_data()
 	uint8_t accel_reg[15] = {0x00};
 	uint8_t accel[15];
 	rt_int16_t data[3];
-	accel_reg[0] = 0xbb;
+#if ACC 
+	accel_reg[0] = 0xbb;//0xbb;
+#else
+	accel_reg[0] = 0xc3;//0xbb;
+#endif
 	rt_sem_take(&imu_sem, RT_WAITING_FOREVER);
-	spi_rw(accel_reg, 15, accel, 15);
+	spi_rw(accel_reg, 3, accel, 3);
 	data[0] = (accel[1] << 8) + accel[2];
-	data[1] = (accel[3] << 8) + accel[4];
-	data[2] = (accel[5] << 8) + accel[6];
+#if ACC
+	accel_reg[0] = 0xbd;
+#else
+	accel_reg[0] = 0xc5;//0xbb;
+#endif
+	spi_rw(accel_reg, 3, accel, 3);
+	data[1] = (accel[1] << 8) + accel[2];
+#if ACC
+	accel_reg[0] = 0xbf;
+#else
+	accel_reg[0] = 0xc7;//0xbb;
+#endif
+	spi_rw(accel_reg, 3, accel, 3);
+	data[2] = (accel[1] << 8) + accel[2];
+#if 0
+	rt_kprintf("gyro/accel %d %d %d\r\n",
+			data[0], data[1], data[2]);
+#endif
+#if ACC
 	if (imu_jump_detect_int(data)) {		
-		//rt_kprintf("find jump\r\n");
+#else
+	if (imu_gyro_jump_detect_int(data)) {		
+#endif
+//		rt_kprintf("find  jump\r\n");
+
 		return 1;
 	}
-#if 0
-	rt_kprintf("accel %06d %06d %06d\r\n",
-			(accel[1] << 8) + accel[2], 
-			(accel[3] << 8) + accel[4],
-			(accel[5] << 8) + accel[6]);
-	rt_kprintf("gyro  %06d %06d %06d\r\n",
-			(accel[9] << 8) + accel[10], 
-			(accel[11] << 8) + accel[12],
-			(accel[13] << 8) + accel[14]);
-	rt_kprintf("temp  %d\r\n",
-			(accel[7] << 8) + accel[8]); 
-#endif
 	return 0;
 }
