@@ -36,11 +36,13 @@ static void IntDefaultHandler(void);
 static void SVC_Handler(void);
 extern void EXTI4_15_IRQHandler(void);
 extern void USART1_IRQHandler(void);
+extern void USART2_IRQHandler(void);
 extern void SysTick_Handler(void);
 extern void PendSV_Handler(void);
 extern void HardFault_Handler(void);
 extern void USB_IRQHandler(void);
 extern void EXTI0_1_IRQHandler(void);
+extern void DMA1_Channel4_5_IRQHandler(void);
 //*****************************************************************************
 //
 // External declaration for the interrupt handler used by the application.
@@ -94,27 +96,27 @@ void (* const g_pfnVectors[])(void) =
 	EXTI0_1_IRQHandler,    //	EXTI0_1_IRQHandler
 	IntDefaultHandler,    //	EXTI2_3_IRQHandler
 	IntDefaultHandler,    //	EXTI4_15_IRQHandler
-	0,    
+	IntDefaultHandler,	//	TSC_IRQHandler    
 	IntDefaultHandler,    //	DMA1_Channel1_IRQHandler
 	IntDefaultHandler,    //	DMA1_Channel2_3_IRQHandler
-	IntDefaultHandler,    //	DMA1_Channel4_5_IRQHandler
+	DMA1_Channel4_5_IRQHandler,    //	DMA1_Channel4_5_IRQHandler
 	IntDefaultHandler,    //	ADC1_IRQHandler
 	IntDefaultHandler,    //	TIM1_BRK_IRQHandler
 	IntDefaultHandler,    //	TIM1_CC_IRQHandler
-	0,    
+	IntDefaultHandler,	//	TIM2_IRQHandler    
 	IntDefaultHandler,    //	TIM3_IRQHandler
 	0,    
 	0,    
 	IntDefaultHandler,    //	TIM14_IRQHandler
-	IntDefaultHandler,    //	TIM15_IRQHandler
+	0,		    //	TIM15_IRQHandler
 	IntDefaultHandler,    //	TIM16_IRQHandler
 	IntDefaultHandler,    //	TIM17_IRQHandler
 	IntDefaultHandler,    //	I2C1_IRQHandler
-	IntDefaultHandler,    //	I2C2_IRQHandler
+	0,		    //	I2C2_IRQHandler
 	IntDefaultHandler,    //	SPI1_IRQHandler
 	IntDefaultHandler,    //	SPI2_IRQHandler
-	IntDefaultHandler,    //	SPI2_IRQHandler
-	IntDefaultHandler,    //	USART2_IRQHandler
+	IntDefaultHandler,    //	USART1_IRQHandler
+	USART2_IRQHandler,    //	USART2_IRQHandler	
 	0,
 	IntDefaultHandler,    //	CEC_CAN
 	USB_IRQHandler,	      //	USB

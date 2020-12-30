@@ -29,8 +29,12 @@
 
 
 /* Includes ------------------------------------------------------------------*/
+#include <rtthread.h>
 #include "stm32_it.h"
 
+extern uint8_t uart_tx_buf[64];
+extern uint8_t uart_rx_buf[64];
+uint8_t _uart_rx_buf[64];
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -38,7 +42,8 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 uint8_t Send_Buffer[2];
-uint8_t PrevXferDone = 1;
+uint8_t PrevRxDone = 1;
+uint8_t PrevTxDone = 1;
 extern uint32_t ADC_ConvertedValueX;
 extern uint32_t ADC_ConvertedValueX_1;
 
@@ -103,41 +108,69 @@ void USB_IRQHandler(void)
 {
   USB_Istr();
 }
-
-/**
-  * @brief  This function handles EXTI14_15_IRQ Handler.
-  * @param  None
-  * @retval None
-  */
-void EXTI4_15_IRQHandler(void)
+void USART2_IRQHandler(void)
 {
-  
-#if 0
- 	if (EXTI_GetITStatus(TAMPER_BUTTON_EXTI_LINE) != RESET)
-  {
-    if((PrevXferDone)  && (USB_Device_dev.dev.device_status==USB_CONFIGURED))
-    {
-      Send_Buffer[0] = 0x06; 
-  /*    
-      if (STM_EVAL_PBGetState(BUTTON_TAMPER) == Bit_RESET)
-      {
-        Send_Buffer[1] = 0x01;
-      }
-      else
-      {
-        Send_Buffer[1] = 0x00;
-      }
-*/
-      USBD_HID_SendReport (&USB_Device_dev, Send_Buffer, 2);  
-      PrevXferDone = 0;
-    }
-    
-    /* Clear the EXTI line pending bit */
-    EXTI_ClearITPendingBit(TAMPER_BUTTON_EXTI_LINE);
-  }
-#endif
-}
 
+	rt_interrupt_enter();
+	if (USART_GetFlagStatus(USART2, USART_FLAG_FE) != RESET) 
+	{
+		USART_ReceiveData(USART2); 
+		USART_ClearFlag(USART2, USART_FLAG_FE);
+	}
+
+	if(USART_GetFlagStatus(USART2, USART_FLAG_PE) != RESET)         
+	{        
+		USART_ReceiveData(USART2);  
+		USART_ClearFlag(USART2, USART_FLAG_PE);  			  
+	}																						 
+	if(USART_GetFlagStatus(USART2,USART_FLAG_ORE) != RESET)
+	{
+		USART_ReceiveData(USART2);
+		USART_ClearFlag(USART2,USART_FLAG_ORE);
+	}
+#if 0
+	uint8_t data_len;
+	if(USART_GetFlagStatus(USART2, USART_FLAG_IDLE)!= RESET) {
+		DMA_Cmd(DMA1_Channel5, DISABLE);
+		data_len = 64 - DMA_GetCurrDataCounter(DMA1_Channel5);
+		if (data_len > 0) {
+			if (PrevRxDone &&
+				USB_Device_dev.dev.device_status == USB_CONFIGURED) {
+				PrevRxDone = 0;
+				rt_memcpy(_uart_rx_buf, uart_rx_buf, data_len);
+				USBD_HID_SendReport (&USB_Device_dev, _uart_rx_buf, 64);
+			}
+		}
+	}
+#endif
+	rt_interrupt_leave();
+}
+void DMA1_Channel4_5_IRQHandler(void)
+{
+	rt_interrupt_enter();
+	if (DMA_GetFlagStatus(DMA1_FLAG_TC4)) {
+		/* data sending to mcu finish */
+		PrevTxDone = 1;
+  		DMA_ClearFlag(DMA1_FLAG_TC4);
+  		DMA_Cmd(DMA1_Channel4, DISABLE);
+	} else if (DMA_GetFlagStatus(DMA1_FLAG_TC5)){
+  		DMA_ClearFlag(DMA1_FLAG_TC5);
+#if 1
+		DMA_Cmd(DMA1_Channel5, DISABLE);
+		/* data from mcu finish */
+		//rt_kprintf("DMA1_FLAG_TC5, PrevRxDone %d, conf %d\r\n",
+		//		PrevRxDone, USB_Device_dev.dev.device_status)
+		if (PrevRxDone &&
+			USB_Device_dev.dev.device_status == USB_CONFIGURED) {
+			PrevRxDone = 0;
+			rt_memcpy(_uart_rx_buf, uart_rx_buf, 64);
+			USBD_HID_SendReport (&USB_Device_dev, _uart_rx_buf, 64);
+			//rt_kprintf("hid sending \r\n");
+		}
+#endif
+	}
+	rt_interrupt_leave();
+}
 /**
   * @brief  This function handles DMA1_Channel1 Handler.
   * @param  None
@@ -149,14 +182,14 @@ void DMA1_Channel1_IRQHandler(void)
   
   if((ADC_ConvertedValueX >>4) - (ADC_ConvertedValueX_1 >>4) > 4)
   {
-    if ((PrevXferDone) && (USB_Device_dev.dev.device_status == USB_CONFIGURED))
+    if ((PrevRxDone) && (USB_Device_dev.dev.device_status == USB_CONFIGURED))
     {
       Send_Buffer[1] = (uint8_t)(ADC_ConvertedValueX >>4);
       
       USBD_HID_SendReport (&USB_Device_dev, Send_Buffer, 2);
       
       ADC_ConvertedValueX_1 = ADC_ConvertedValueX;
-      PrevXferDone = 0;
+      PrevRxDone = 0;
     }
   }
     /* Test DMA1 TC flag */
