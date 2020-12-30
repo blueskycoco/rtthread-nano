@@ -13,13 +13,13 @@
 #include "usbd_custom_hid_core.h"
 #include  "usbd_usr.h"
 
-//USB_CORE_HANDLE  USB_Device_dev ;
+USB_CORE_HANDLE  USB_Device_dev ;
 void led_init()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
-	
+
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
@@ -30,30 +30,21 @@ void led_init()
 
 int main(void)
 {
-//	rt_kprintf("sys clk %d\r\n", SystemCoreClock);
-   led_init();
-//  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-//  SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;
+	//	rt_kprintf("sys clk %d\r\n", SystemCoreClock);
+	led_init();
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;
 
- //  USBD_Init(&USB_Device_dev,
-   //         &USR_desc, 
-     //       &USBD_HID_cb, 
-       //     &USR_cb);
-   init_imu();
-    while (1)
-    {
-    	    if (get_imu_data())
-    	    	    GPIO_SetBits(GPIOB,GPIO_Pin_1);
-	    else
-	    	    GPIO_ResetBits(GPIOB,GPIO_Pin_1);
-#if 0
-    	    GPIO_ResetBits(GPIOB,GPIO_Pin_1);
-        rt_thread_mdelay(500);
-//	rt_kprintf("led on\r\n");        
-	GPIO_SetBits(GPIOB,GPIO_Pin_1);
-        rt_thread_mdelay(500);
-//	rt_kprintf("led off\r\n");        
-#endif
-    }
+	USBD_Init(&USB_Device_dev,
+			&USR_desc, 
+			&USBD_HID_cb, 
+			&USR_cb);
+	while (1)
+	{
+		GPIO_ResetBits(GPIOB,GPIO_Pin_1);
+		rt_thread_mdelay(500);
+		GPIO_SetBits(GPIOB,GPIO_Pin_1);
+		rt_thread_mdelay(500);
+	}
 }
 

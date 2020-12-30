@@ -76,7 +76,7 @@ void EXTI0_1_IRQHandler(void)
 	rt_interrupt_enter();
 	if(EXTI_GetITStatus(EXTI_Line1))
 	{	 
-		imu_isr();	
+		//imu_isr();	
 		EXTI_ClearITPendingBit(EXTI_Line1);
 	}
 	/* leave interrupt */

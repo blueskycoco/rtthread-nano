@@ -36,7 +36,7 @@
 #define USBD_LANGID_STRING            0x409
 #define USBD_MANUFACTURER_STRING      "Nreal"
 
-#define USBD_PRODUCT_FS_STRING        "IMU"
+#define USBD_PRODUCT_FS_STRING        "Eva"
 
 #define USBD_CONFIGURATION_FS_STRING  "HID Config"
 #define USBD_INTERFACE_FS_STRING      "HID Interface"
