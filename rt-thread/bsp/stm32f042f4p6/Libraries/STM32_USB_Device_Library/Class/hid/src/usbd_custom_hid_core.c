@@ -466,6 +466,28 @@ uint8_t  *USBD_HID_GetCfgDesc (uint8_t speed, uint16_t *length)
 	*length = sizeof (USBD_HID_CfgDesc);
 	return (uint8_t*)USBD_HID_CfgDesc;
 }
+void uart_recover(void)
+{
+
+		//rt_kprintf("hid send done %x\r\n", USART2->ISR);
+	if (USART_GetFlagStatus(USART2, USART_FLAG_FE) != RESET) 
+	{
+		USART_ReceiveData(USART2); 
+		USART_ClearFlag(USART2, USART_FLAG_FE);
+	}
+
+	if(USART_GetFlagStatus(USART2, USART_FLAG_PE) != RESET)         
+	{        
+		USART_ReceiveData(USART2);  
+		USART_ClearFlag(USART2, USART_FLAG_PE);  			  
+	}																						 
+	if(USART_GetFlagStatus(USART2,USART_FLAG_ORE) != RESET)
+	{
+		USART_ReceiveData(USART2);
+		USART_ClearFlag(USART2,USART_FLAG_ORE);
+	}
+		//rt_kprintf("hid send done, new %x\r\n", USART2->ISR);
+}
 /**
  * @brief  USBD_HID_DataIn
  *         handle data IN Stage
@@ -480,7 +502,7 @@ uint8_t  USBD_HID_DataIn (void  *pdev,
 		PrevRxDone = 1;
 		DMA1_Channel5->CNDTR = 64;
 		DMA_Cmd(DMA1_Channel5, ENABLE);
-		rt_kprintf("hid send done\r\n");
+		uart_recover();
 	}
 	return USBD_OK;
 }
@@ -499,7 +521,7 @@ uint8_t  USBD_HID_DataOut (void  *pdev,
 		PrevTxDone = 0;
 		int len = ((USB_CORE_HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
 		rt_memcpy(uart_tx_buf, Report_buf, 64);
-		DMA_Cmd(DMA1_Channel4, DISABLE);
+		//DMA_Cmd(DMA1_Channel4, DISABLE);
 		DMA1_Channel4->CNDTR = 64;
 		DMA_Cmd(DMA1_Channel4, ENABLE);
 #if 0
@@ -510,7 +532,9 @@ uint8_t  USBD_HID_DataOut (void  *pdev,
 		}
 		rt_kprintf("\r\n");
 #endif
-	}
+	} else
+		rt_kprintf("lost data\r\n");
+
 	DCD_EP_PrepareRx(pdev,HID_IN_EP,Report_buf,64);
 
 	return USBD_OK;

@@ -41,10 +41,10 @@ int main(void)
 			&USR_cb);
 	while (1)
 	{
-		GPIO_ResetBits(GPIOB,GPIO_Pin_1);
+//		GPIO_ResetBits(GPIOB,GPIO_Pin_1);
 		rt_thread_mdelay(500);
-		GPIO_SetBits(GPIOB,GPIO_Pin_1);
-		rt_thread_mdelay(500);
+//		GPIO_SetBits(GPIOB,GPIO_Pin_1);
+//		rt_thread_mdelay(500);
 	}
 }
 

@@ -102,7 +102,7 @@ static void uart_dma_config()
 	
 	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
 	DMA_Cmd(DMA1_Channel5, ENABLE);
@@ -139,7 +139,7 @@ static int uart_init(void)
 
 	uart_dma_config();
 
-	USART_ITConfig(USART2, USART_IT_ORE|USART_IT_PE|USART_IT_FE|USART_IT_IDLE|USART_IT_RXNE, ENABLE);	
+	USART_ITConfig(USART2, USART_IT_IDLE, ENABLE);	
 	
 	USART_Cmd(USART2, ENABLE);
 	USART_ClearFlag(USART2, USART_FLAG_TC);
