@@ -93,7 +93,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	RTC_IRQHandler
 	IntDefaultHandler,    //	FLASH_IRQHandler
 	IntDefaultHandler,    //	RCC_IRQHandler
-	EXTI0_1_IRQHandler,    //	EXTI0_1_IRQHandler
+	IntDefaultHandler,    //	EXTI0_1_IRQHandler
 	IntDefaultHandler,    //	EXTI2_3_IRQHandler
 	IntDefaultHandler,    //	EXTI4_15_IRQHandler
 	IntDefaultHandler,	//	TSC_IRQHandler    

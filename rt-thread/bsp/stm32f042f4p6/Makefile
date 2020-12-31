@@ -45,6 +45,7 @@ IPATH += ./Libraries/STM32_USB_Device_Library/Core/inc
 IPATH += ./Libraries/STM32F0xx_StdPeriph_Driver/inc
 IPATH += ../../include
 IPATH += ../../components/finsh
+IPATH += ./main
 
 VPATH = .
 VPATH += ./main
@@ -87,6 +88,7 @@ ${COMPILER}/rtthread.axf: ${COMPILER}/system_stm32f0xx.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/main.o
 #${COMPILER}/rtthread.axf: ${COMPILER}/imu.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/board.o
+${COMPILER}/rtthread.axf: ${COMPILER}/mem_list.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32_it.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/usb_bsp.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/usbd_desc.o
