@@ -9,7 +9,7 @@
  * 2013-04-14     Grissiom     initial implementation
  * 2019-12-09     Steven Liu   add YMODEM send protocol
  */
-
+#include <unistd.h>
 #include "y.h"
 #include "lusb0_usb.h"
 #include "usb.h"
@@ -181,6 +181,7 @@ static size_t _rym_getchar(struct rym_ctx *ctx)
 		if (rsz != 64) {
 			continue;
 		}
+		//printf("%s %d: getchar %x, len %d\r\n", __func__, __LINE__,uart_rx_buf[0], rsz);
 		getc_ack = uart_rx_buf[0];
 		break;
 	}
@@ -219,7 +220,7 @@ int _rym_do_send_handshake(
 	/* congratulations, check passed. */
 	//if (ctx->on_begin && ctx->on_begin(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
 	//    return -RYM_ERR_CODE;
-	printf("handshake ok\r\n");
+	//printf("handshake ok\r\n");
 	code = RYM_CODE_SOH;
 	_rym_send_packet(ctx, code, index);
 
@@ -231,6 +232,7 @@ int _rym_do_send_handshake(
 		return -RYM_ERR_ACK;
 	}
 
+	//printf("handshake ok 1\r\n");
 	getc_ack = _rym_getchar(ctx);
 
 	if (getc_ack != RYM_CODE_C)
@@ -258,6 +260,7 @@ static int _rym_do_send_trans(struct rym_ctx *ctx)
 		//if (ctx->on_data && ctx->on_data(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
 		//    return -RYM_ERR_CODE;
 		//read sending data
+		printf("%s %d: sending %d ...\r\n", __func__, __LINE__,index);
 		code = RYM_CODE_SOH;
 		memcpy(ctx->buf+3, send_file+ofs, data_sz - 5);
 		ofs += (data_sz-5);

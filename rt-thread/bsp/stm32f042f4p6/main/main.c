@@ -58,7 +58,7 @@ int main(void)
 	//		&USR_desc, 
 	//		&USBD_HID_cb, 
 	//		&USR_cb);
-#if 0
+#if 1
 	rt_sem_take(&sem, RT_WAITING_FOREVER);
 	rt_kprintf("got uart data\r\n");
 	for (i=0; i<64; i++) {
@@ -66,10 +66,11 @@ int main(void)
 	}
 	rt_kprintf("\r\n");
 	uart_rx_set();
-//	_rym_do_recv(&ctx, RT_WAITING_FOREVER);
+	_rym_do_recv(&ctx, RT_WAITING_FOREVER);
 #endif
 	while (1)
 	{
+#if 0
 		rt_sem_take(&sem, RT_WAITING_FOREVER);
 		rt_kprintf("got uart data\r\n");
 		for (i=0; i<64; i++) {
@@ -80,6 +81,7 @@ int main(void)
 		rt_memcpy(uart_tx_buf, uart_rx_buf, 64);
 		uart_tx_set();
 		uart_recover();
+#endif
 		if (flag == 1) {
 			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
 			flag = 0;

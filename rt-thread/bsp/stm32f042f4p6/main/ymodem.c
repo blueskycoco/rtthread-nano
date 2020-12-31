@@ -126,7 +126,7 @@ static enum rym_code _rym_read_code(
         //if (rsz == 1)
         ctx->buf[0] = uart_rx_buf[0];
         uart_rx_set();
-        rt_kprintf("%s %d: code %c\r\n", __func__, __LINE__, ctx->buf[0]);
+        rt_kprintf("%s %d: code %x\r\n", __func__, __LINE__, ctx->buf[0]);
         return (enum rym_code)(*ctx->buf);
     }
     while (1);
@@ -138,7 +138,7 @@ static rt_size_t _rym_read_data(
     rt_size_t len)
 {
     /* we should already have had the code */
-    rt_uint8_t *buf = ctx->buf + 1;
+    rt_uint8_t *buf = ctx->buf;// + 1;
     rt_size_t readlen = 0;
     
     while (rt_sem_take(&sem, RYM_WAIT_CHR_TICK) == RT_EOK);
@@ -153,6 +153,7 @@ static rt_size_t _rym_read_data(
 	    	readlen = len;
 	    }
         	uart_rx_set();
+        	rt_kprintf("%s %d: readlen %d\r\n", __func__, __LINE__, readlen);
         if (readlen >= len)
             return readlen;
     }
@@ -193,7 +194,8 @@ static rt_size_t _rym_putchar(struct rym_ctx *ctx, rt_uint8_t code)
     //rt_device_write(ctx->dev, 0, &code, sizeof(code));
     uart_tx_buf[0] = code;
     uart_tx_set();
-    rt_kprintf("%s %d: code %c\r\n", __func__, __LINE__, code);
+    rt_sem_take(&sem, RT_WAITING_FOREVER);
+    rt_kprintf("%s %d: code %x\r\n", __func__, __LINE__, code);
     return 1;
 }
 
@@ -238,18 +240,19 @@ static rt_err_t _rym_do_handshake(
             break;
         }
     }
+	rt_kprintf("%s %d: i %d, data_sz %d\r\n", __func__, __LINE__, i, data_sz);
     if (i == tm_sec)
     {
         return -RYM_ERR_TMO;
     }
-
+	return RT_EOK;
     /* receive all data */
     i = 0;
     /* automatic exit after receiving specified length data, timeout: 100ms */
     tick = rt_tick_get();
     while (rt_tick_get() <= (tick + rt_tick_from_millisecond(100)) && i < (data_sz - 1))
     {
-        i += _rym_read_data(ctx, data_sz - 1);
+        i += _rym_read_data(ctx, data_sz);
         rt_thread_mdelay(5);
     }
 
@@ -332,19 +335,21 @@ static rt_err_t _rym_trans_data(
     rt_size_t data_sz,
     enum rym_code *code)
 {
-    const rt_size_t tsz = 2 + data_sz + 2;
+    const rt_size_t tsz = 1 + 2 + data_sz + 2;
     rt_uint16_t recv_crc;
 
     /* seq + data + crc */
     rt_size_t i = _rym_read_data(ctx, tsz);
     if (i != tsz)
         return -RYM_ERR_DSZ;
-
+	rt_kprintf("%s %d: read %d, buf[1] %x buf[2] %x\r\n",
+			__func__, __LINE__, ctx->buf[1], ctx->buf[2]);
     if ((ctx->buf[1] + ctx->buf[2]) != 0xFF)
     {
         return -RYM_ERR_SEQ;
     }
-
+	rt_kprintf("%s %d: stage %x, buf[1] %x\r\n",
+			__func__, __LINE__, ctx->stage, ctx->buf[1]);
     /* As we are sending C continuously, there is a chance that the
      * sender(remote) receive an C after sending the first handshake package.
      * So the sender will interpret it as NAK and re-send the package. So we
@@ -356,16 +361,17 @@ static rt_err_t _rym_trans_data(
     }
 
     ctx->stage = RYM_STAGE_TRANSMITTING;
-
     /* sanity check */
     recv_crc = (rt_uint16_t)(*(ctx->buf + tsz - 1) << 8) | *(ctx->buf + tsz);
+	rt_kprintf("%s %d crx %x, CRC16 %x\r\n", __func__, __LINE__, recv_crc,
+			CRC16(ctx->buf+3, data_sz));
     if (recv_crc != CRC16(ctx->buf + 3, data_sz))
         return -RYM_ERR_CRC;
 
     /* congratulations, check passed. */
-    if (ctx->on_data)
-        *code = ctx->on_data(ctx, ctx->buf + 3, data_sz);
-    else
+    //if (ctx->on_data)
+    //    *code = ctx->on_data(ctx, ctx->buf + 3, data_sz);
+    //else
         *code = RYM_CODE_ACK;
     rt_kprintf("check passed\r\n");
     return RT_EOK;
@@ -374,6 +380,7 @@ static rt_err_t _rym_trans_data(
 static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 {
     _rym_putchar(ctx, RYM_CODE_ACK);
+    //rt_thread_mdelay(5);
     _rym_putchar(ctx, RYM_CODE_C);
     ctx->stage = RYM_STAGE_ESTABLISHED;
 
@@ -382,7 +389,7 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
         rt_err_t err;
         enum rym_code code;
         rt_size_t data_sz, i;
-
+#if 0
         code = _rym_read_code(ctx,
                               RYM_WAIT_PKG_TICK);
         switch (code)
@@ -398,7 +405,8 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
         default:
             return -RYM_ERR_CODE;
         };
-
+#endif
+	data_sz = 128;
         err = _rym_trans_data(ctx, data_sz, &code);
         if (err != RT_EOK)
             return err;

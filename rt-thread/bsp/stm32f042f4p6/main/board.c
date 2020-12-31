@@ -106,7 +106,7 @@ static void uart_dma_config()
 	NVIC_Init(&NVIC_InitStructure);
 
 	DMA_Cmd(DMA1_Channel5, ENABLE);
-	DMA_Cmd(DMA1_Channel4, ENABLE);
+	DMA_Cmd(DMA1_Channel4, DISABLE);
 	
 	DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);
 	DMA_ITConfig(DMA1_Channel5, DMA_IT_TC, ENABLE);

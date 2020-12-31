@@ -159,6 +159,7 @@ void DMA1_Channel4_5_IRQHandler(void)
 		PrevTxDone = 1;
   		DMA_ClearFlag(DMA1_FLAG_TC4);
   		DMA_Cmd(DMA1_Channel4, DISABLE);
+    		rt_sem_release(&sem);
 	} else if (DMA_GetFlagStatus(DMA1_FLAG_TC5)){
   		DMA_ClearFlag(DMA1_FLAG_TC5);
 		DMA_Cmd(DMA1_Channel5, DISABLE);
