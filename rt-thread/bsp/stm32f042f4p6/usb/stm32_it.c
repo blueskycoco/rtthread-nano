@@ -32,6 +32,7 @@
 #include <rtthread.h>
 #include "stm32_it.h"
 
+extern struct rt_semaphore sem;
 extern uint8_t uart_tx_buf[64];
 extern uint8_t uart_rx_buf[64];
 uint8_t _uart_rx_buf[64];
@@ -160,10 +161,12 @@ void DMA1_Channel4_5_IRQHandler(void)
   		DMA_Cmd(DMA1_Channel4, DISABLE);
 	} else if (DMA_GetFlagStatus(DMA1_FLAG_TC5)){
   		DMA_ClearFlag(DMA1_FLAG_TC5);
-#if 1
+		DMA_Cmd(DMA1_Channel5, DISABLE);
 		/* data from mcu finish */
 		//rt_kprintf("DMA1_FLAG_TC5, PrevRxDone %d, conf %d\r\n",
 		//		PrevRxDone, USB_Device_dev.dev.device_status)
+    		rt_sem_release(&sem);
+#if 0
 		if (PrevRxDone &&
 			USB_Device_dev.dev.device_status == USB_CONFIGURED) {
 			GPIO_SetBits(GPIOB,GPIO_Pin_1);
