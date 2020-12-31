@@ -87,6 +87,7 @@ ${COMPILER}/rtthread.axf: ${COMPILER}/system_stm32f0xx.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/main.o
 #${COMPILER}/rtthread.axf: ${COMPILER}/imu.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/board.o
+${COMPILER}/rtthread.axf: ${COMPILER}/ymodem.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32_it.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/usb_bsp.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/usbd_desc.o
