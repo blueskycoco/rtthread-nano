@@ -12,10 +12,12 @@
 #include <stm32f0xx.h>
 #include "usbd_custom_hid_core.h"
 #include  "usbd_usr.h"
+#include "ymodem.h"
 
 USB_CORE_HANDLE  USB_Device_dev ;
 extern uint8_t uart_rx_buf[64];
 extern uint8_t uart_tx_buf[64];
+struct rym_ctx ctx;
 struct rt_semaphore sem;
 void led_init()
 {
@@ -30,7 +32,18 @@ void led_init()
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
-
+void uart_tx_set()
+{
+	DMA_Cmd(DMA1_Channel4, DISABLE);
+	DMA1_Channel4->CNDTR = 64;
+	DMA_Cmd(DMA1_Channel4, ENABLE);
+}
+void uart_rx_set()
+{
+	DMA_Cmd(DMA1_Channel5, DISABLE);
+	DMA1_Channel5->CNDTR = 64;
+	DMA_Cmd(DMA1_Channel5, ENABLE);
+}
 int main(void)
 {
 	int i = 0;
@@ -45,6 +58,16 @@ int main(void)
 	//		&USR_desc, 
 	//		&USBD_HID_cb, 
 	//		&USR_cb);
+#if 0
+	rt_sem_take(&sem, RT_WAITING_FOREVER);
+	rt_kprintf("got uart data\r\n");
+	for (i=0; i<64; i++) {
+		rt_kprintf("%c", uart_rx_buf[i]);
+	}
+	rt_kprintf("\r\n");
+	uart_rx_set();
+//	_rym_do_recv(&ctx, RT_WAITING_FOREVER);
+#endif
 	while (1)
 	{
 		rt_sem_take(&sem, RT_WAITING_FOREVER);
@@ -53,11 +76,9 @@ int main(void)
 			rt_kprintf("%c", uart_rx_buf[i]);
 		}
 		rt_kprintf("\r\n");
-		DMA1_Channel5->CNDTR = 64;
-		DMA_Cmd(DMA1_Channel5, ENABLE);
+		uart_rx_set();
 		rt_memcpy(uart_tx_buf, uart_rx_buf, 64);
-		DMA1_Channel4->CNDTR = 64;
-		DMA_Cmd(DMA1_Channel4, ENABLE);
+		uart_tx_set();
 		uart_recover();
 		if (flag == 1) {
 			GPIO_ResetBits(GPIOB,GPIO_Pin_1);

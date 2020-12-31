@@ -31,6 +31,12 @@ int main(int argc, void* argv[])
 		}
 	} else {
 		while(1) {
+			memset(cmd, 0x33, 64);
+			cmd[62] = '\r';
+			cmd[63] = '\n';
+			rcv_len = hid_xfer(handle, 0x01, cmd, 64, 1000);
+			all_rcv += rcv_len;
+			printf("all_send %d\r\n", all_rcv);
 			len = hid_xfer(handle, 0x81, rsp, 64, 1000);
 			if (len > 0) {
 				all_len += len;
@@ -38,13 +44,8 @@ int main(int argc, void* argv[])
 				for(j=0; j<len; j++)
 					printf("%c", rsp[j]);
 				printf("\r\n");
-			}
-			memset(cmd, 0x33, 64);
-			cmd[62] = '\r';
-			cmd[63] = '\n';
-			rcv_len = hid_xfer(handle, 0x01, cmd, 64, 1000);
-			all_rcv += rcv_len;
-			printf("all_send %d\r\n", all_rcv);
+			} else
+				printf("rcv errno %d\r\n", len);
 		}
 	}
 	close_usb(handle, 0);

@@ -13,7 +13,7 @@
 #ifndef __YMODEM_H__
 #define __YMODEM_H__
 
-#include "rtthread.h"
+#include <stdio.h>
 #include <string.h>
 
 /* The word "RYM" is stand for "Real-YModem". */
@@ -54,15 +54,15 @@ enum rym_code
 
 /* how many ticks wait for chars between packet. */
 #ifndef RYM_WAIT_CHR_TICK
-#define RYM_WAIT_CHR_TICK (RT_TICK_PER_SECOND * 3)
+#define RYM_WAIT_CHR_TICK (100 * 3)
 #endif
 /* how many ticks wait for between packet. */
 #ifndef RYM_WAIT_PKG_TICK
-#define RYM_WAIT_PKG_TICK (RT_TICK_PER_SECOND * 3)
+#define RYM_WAIT_PKG_TICK (100 * 3)
 #endif
 /* how many ticks between two handshake code. */
 #ifndef RYM_CHD_INTV_TICK
-#define RYM_CHD_INTV_TICK (RT_TICK_PER_SECOND * 3)
+#define RYM_CHD_INTV_TICK (100 * 3)
 #endif
 
 /* how many CAN be sent when user active end the session. */
@@ -96,7 +96,7 @@ struct rym_ctx;
  * transfer and the buf will be discarded. Any other return values will cause
  * the transfer continue.
  */
-typedef enum rym_code(*rym_callback)(struct rym_ctx *ctx, rt_uint8_t *buf, rt_size_t len);
+typedef enum rym_code(*rym_callback)(struct rym_ctx *ctx, uint8_t *buf, size_t len);
 
 /* Currently RYM only support one transfer session(ctx) for simplicity.
  *
@@ -112,14 +112,14 @@ struct rym_ctx
      * happened. */
     enum rym_stage stage;
     /* user could get the error content through this */
-    rt_uint8_t buf[1300];
+    uint8_t buf[1300];
 
     //struct rt_semaphore sem;
 
     //rt_device_t dev;
 };
 
-rt_err_t _rym_do_recv(
+int _rym_do_recv(
     struct rym_ctx *ctx,
     int handshake_timeout);
 /* recv a file on device dev with ymodem session ctx.
