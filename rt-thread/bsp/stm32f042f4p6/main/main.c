@@ -30,7 +30,6 @@ void led_init()
 
 int main(void)
 {
-	//	rt_kprintf("sys clk %d\r\n", SystemCoreClock);
 	led_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 	SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;
@@ -42,7 +41,7 @@ int main(void)
 	while (1)
 	{
 //		GPIO_ResetBits(GPIOB,GPIO_Pin_1);
-		rt_thread_mdelay(500);
+//		rt_thread_mdelay(500);
 //		GPIO_SetBits(GPIOB,GPIO_Pin_1);
 //		rt_thread_mdelay(500);
 	}
