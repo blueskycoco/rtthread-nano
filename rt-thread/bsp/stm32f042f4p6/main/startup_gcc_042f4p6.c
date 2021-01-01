@@ -116,7 +116,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	SPI1_IRQHandler
 	IntDefaultHandler,    //	SPI2_IRQHandler
 	IntDefaultHandler,    //	USART1_IRQHandler
-	IntDefaultHandler,    //	USART2_IRQHandler	
+	USART2_IRQHandler,    //	USART2_IRQHandler
 	0,
 	IntDefaultHandler,    //	CEC_CAN
 	USB_IRQHandler,	      //	USB

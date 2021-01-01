@@ -2,6 +2,7 @@
 #include "usbd_custom_hid_core.h"
 #include "mem_list.h"
 
+extern rt_bool_t hid_sent;
 uint8_t  USBD_HID_Init (void  *pdev, uint8_t cfgidx);
 uint8_t  USBD_HID_DeInit (void  *pdev, uint8_t cfgidx);
 uint8_t  USBD_HID_Setup (void  *pdev, USB_SETUP_REQ *req);
@@ -269,6 +270,7 @@ uint8_t  *USBD_HID_GetCfgDesc (uint8_t speed, uint16_t *length)
 	*length = sizeof (USBD_HID_CfgDesc);
 	return (uint8_t*)USBD_HID_CfgDesc;
 }
+#if 0
 void uart_recover(void)
 {
 
@@ -289,6 +291,7 @@ void uart_recover(void)
 		USART_ClearFlag(USART2,USART_FLAG_ORE);
 	}
 }
+#endif
 /**
  * @brief  USBD_HID_DataIn
  *         handle data IN Stage
@@ -300,6 +303,7 @@ uint8_t  USBD_HID_DataIn (void  *pdev,
 		uint8_t epnum)
 {
 	if (epnum == 1) {
+		hid_sent = RT_TRUE;
 		notify_uart2hid();
 	}
 	return USBD_OK;
