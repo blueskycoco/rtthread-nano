@@ -140,8 +140,9 @@ static rt_size_t _rym_read_data(
     /* we should already have had the code */
     rt_uint8_t *buf = ctx->buf;// + 1;
     rt_size_t readlen = 0;
-    
-    while (rt_sem_take(&sem, RYM_WAIT_CHR_TICK) == RT_EOK);
+	int i;
+
+    while (rt_sem_take(&sem, RYM_WAIT_CHR_TICK) == RT_EOK)
     {
 		//readlen += rt_device_read(ctx->dev,
                 //                  0, buf + readlen, len - readlen);
@@ -153,9 +154,13 @@ static rt_size_t _rym_read_data(
 	    	readlen = len;
 	    }
         	uart_rx_set();
-        	rt_kprintf("%s %d: readlen %d\r\n", __func__, __LINE__, readlen);
-        if (readlen >= len)
-            return readlen;
+        	rt_kprintf("%s %d: readlen %d, len %d\r\n", __func__, __LINE__, readlen, len);
+        if (readlen >= len) {
+         	for (i=0; i<len; i++)
+         		rt_kprintf("%x ", buf[i]);
+         	rt_kprintf("\r\n");
+         	return readlen;
+	}
     }
 
     uart_rx_set();
@@ -343,7 +348,7 @@ static rt_err_t _rym_trans_data(
     if (i != tsz)
         return -RYM_ERR_DSZ;
 	rt_kprintf("%s %d: read %d, buf[1] %x buf[2] %x\r\n",
-			__func__, __LINE__, ctx->buf[1], ctx->buf[2]);
+			__func__, __LINE__, i, ctx->buf[1], ctx->buf[2]);
     if ((ctx->buf[1] + ctx->buf[2]) != 0xFF)
     {
         return -RYM_ERR_SEQ;
@@ -362,7 +367,7 @@ static rt_err_t _rym_trans_data(
 
     ctx->stage = RYM_STAGE_TRANSMITTING;
     /* sanity check */
-    recv_crc = (rt_uint16_t)(*(ctx->buf + tsz - 1) << 8) | *(ctx->buf + tsz);
+    recv_crc = (rt_uint16_t)(*(ctx->buf + tsz - 2) << 8) | *(ctx->buf + tsz-1);
 	rt_kprintf("%s %d crx %x, CRC16 %x\r\n", __func__, __LINE__, recv_crc,
 			CRC16(ctx->buf+3, data_sz));
     if (recv_crc != CRC16(ctx->buf + 3, data_sz))
@@ -380,7 +385,7 @@ static rt_err_t _rym_trans_data(
 static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 {
     _rym_putchar(ctx, RYM_CODE_ACK);
-    //rt_thread_mdelay(5);
+    rt_thread_mdelay(50);
     _rym_putchar(ctx, RYM_CODE_C);
     ctx->stage = RYM_STAGE_ESTABLISHED;
 
@@ -389,7 +394,7 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
         rt_err_t err;
         enum rym_code code;
         rt_size_t data_sz, i;
-#if 0
+#if 1
         code = _rym_read_code(ctx,
                               RYM_WAIT_PKG_TICK);
         switch (code)
@@ -406,7 +411,7 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
             return -RYM_ERR_CODE;
         };
 #endif
-	data_sz = 128;
+//	data_sz = 128;
         err = _rym_trans_data(ctx, data_sz, &code);
         if (err != RT_EOK)
             return err;
@@ -483,6 +488,7 @@ static rt_err_t _rym_do_fin(struct rym_ctx *ctx)
         return -RYM_ERR_CODE;
 
     _rym_putchar(ctx, RYM_CODE_ACK);
+    rt_thread_mdelay(50);
     _rym_putchar(ctx, RYM_CODE_C);
 
     code = _rym_read_code(ctx, RYM_WAIT_PKG_TICK);
@@ -497,8 +503,8 @@ static rt_err_t _rym_do_fin(struct rym_ctx *ctx)
     else
         return -RYM_ERR_CODE;
 
-    i = _rym_read_data(ctx, _RYM_SOH_PKG_SZ - 1);
-    if (i != (_RYM_SOH_PKG_SZ - 1))
+    i = _rym_read_data(ctx, _RYM_SOH_PKG_SZ);
+    if (i != (_RYM_SOH_PKG_SZ))
         return -RYM_ERR_DSZ;
 
     /* sanity check

@@ -72,22 +72,24 @@ int main(void)
 	{
 #if 0
 		rt_sem_take(&sem, RT_WAITING_FOREVER);
-		rt_kprintf("got uart data\r\n");
-		for (i=0; i<64; i++) {
-			rt_kprintf("%c", uart_rx_buf[i]);
-		}
-		rt_kprintf("\r\n");
-		uart_rx_set();
+//		rt_kprintf("got uart data\r\n");
+//		for (i=0; i<64; i++) {
+//			rt_kprintf("%c", uart_rx_buf[i]);
+//		}
+//		rt_kprintf("\r\n");
 		rt_memcpy(uart_tx_buf, uart_rx_buf, 64);
 		uart_tx_set();
-		uart_recover();
+		uart_rx_set();
+		//uart_recover();
 #endif
 		if (flag == 1) {
 			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
 			flag = 0;
+			rt_thread_mdelay(1000);
 		} else {
 			GPIO_SetBits(GPIOB,GPIO_Pin_1);
 			flag = 1;
+			rt_thread_mdelay(1000);
 		}
 	}
 }

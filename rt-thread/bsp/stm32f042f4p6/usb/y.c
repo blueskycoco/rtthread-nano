@@ -117,7 +117,7 @@ static enum rym_code _rym_read_code(
 		/* No data yet, wait for one */
 
 		rsz = hid_xfer(handle, 0x81, uart_rx_buf, 64, 1000);
-		printf("%s %d: rsz %d\r\n", __func__, __LINE__, rsz);
+		printf("%s %d: rsz %d %x\r\n", __func__, __LINE__, rsz, uart_rx_buf[0]);
 		if (rsz != 64) {
 			return RYM_CODE_NONE;
 		}
@@ -136,7 +136,7 @@ int _rym_send_packet(
 	uint16_t send_crc;
 	uint8_t index_inv = ~index;
 	size_t writelen = 0;
-
+	int i;
 	send_crc = CRC16(ctx->buf + 3, _RYM_SOH_PKG_SZ - 5);
 	ctx->buf[0] = code;
 	ctx->buf[1] = index;
@@ -155,7 +155,10 @@ int _rym_send_packet(
 	hid_xfer(handle, 0x01, ctx->buf, 64, 1000);
 	hid_xfer(handle, 0x01, ctx->buf+64, 64, 1000);
 	hid_xfer(handle, 0x01, ctx->buf+128, 64, 1000);
-
+	//for (i=0; i<133; i++)
+	//	printf("%x ", ctx->buf[i]);
+	//printf("\r\n");
+	printf("send_crc %x\r\n", send_crc);
 	return 0;
 }
 
@@ -181,7 +184,7 @@ static size_t _rym_getchar(struct rym_ctx *ctx)
 		if (rsz != 64) {
 			continue;
 		}
-		//printf("%s %d: getchar %x, len %d\r\n", __func__, __LINE__,uart_rx_buf[0], rsz);
+		printf("%s %d: getchar %x, len %d\r\n", __func__, __LINE__,uart_rx_buf[0], rsz);
 		getc_ack = uart_rx_buf[0];
 		break;
 	}
@@ -222,8 +225,8 @@ int _rym_do_send_handshake(
 	//    return -RYM_ERR_CODE;
 	//printf("handshake ok\r\n");
 	code = RYM_CODE_SOH;
-	_rym_send_packet(ctx, code, index);
-
+	//_rym_send_packet(ctx, code, index);
+	_rym_putchar(ctx, code);
 	//rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
 	getc_ack = _rym_getchar(ctx);
 
@@ -260,12 +263,16 @@ static int _rym_do_send_trans(struct rym_ctx *ctx)
 		//if (ctx->on_data && ctx->on_data(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
 		//    return -RYM_ERR_CODE;
 		//read sending data
-		printf("%s %d: sending %d ...\r\n", __func__, __LINE__,index);
+		_rym_putchar(ctx, RYM_CODE_SOH);
 		code = RYM_CODE_SOH;
-		memcpy(ctx->buf+3, send_file+ofs, data_sz - 5);
+		if (g_file_len - ofs > (data_sz-5))
+			memcpy(ctx->buf+3, send_file+ofs, data_sz - 5);
+		else
+			memcpy(ctx->buf+3, send_file+ofs, g_file_len - ofs);
 		ofs += (data_sz-5);
-		if (ofs > g_file_len)
+		if (ofs >= g_file_len)
 			ctx->stage = RYM_STAGE_FINISHING;
+		printf("%s %d: sending %d %d...%d %d\r\n", __func__, __LINE__,index, ofs, g_file_len, ctx->stage);
 		_rym_send_packet(ctx, code, index);
 		index++;
 		//rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
@@ -321,7 +328,8 @@ static int _rym_do_send_fin(struct rym_ctx *ctx)
 	//    return -RYM_ERR_CODE;
 
 	code = RYM_CODE_SOH;
-
+	
+	_rym_putchar(ctx, RYM_CODE_SOH);
 	_rym_send_packet(ctx, code, index);
 
 	ctx->stage = RYM_STAGE_FINISHED;
