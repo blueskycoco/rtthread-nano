@@ -16,7 +16,7 @@
 
 #define EVENT_UART2HID	0x01
 #define EVENT_HID2UART	0x02
-extern rt_bool_t hid_sent;
+rt_bool_t hid_sent = RT_TRUE;
 extern rt_uint8_t uart_tx_buf[64];
 static struct rt_event event;
 USB_CORE_HANDLE  USB_Device_dev ;
@@ -98,7 +98,7 @@ int main(void)
 
 			if (status & EVENT_UART2HID) {
 				remove_mem(TYPE_UART2HID, &uart);
-				if (uart != RT_NULL) {
+				if (uart != RT_NULL && hid_sent) {
 					hid_sent = RT_FALSE;
 					USBD_HID_SendReport (&USB_Device_dev,
 							uart, 64);

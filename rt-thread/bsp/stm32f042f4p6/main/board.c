@@ -140,9 +140,9 @@ static int uart_init(void)
 	uart_dma_config();
 
 	USART_ITConfig(USART2, USART_IT_ORE, ENABLE);
-	USART_ITConfig(USART2, USART_IT_PE, ENABLE);
-	USART_ITConfig(USART2, USART_IT_FE, ENABLE);
-	USART_ITConfig(USART2, USART_IT_NE, ENABLE);
+	//USART_ITConfig(USART2, USART_IT_PE, ENABLE);
+	//USART_ITConfig(USART2, USART_IT_FE, ENABLE);
+	//USART_ITConfig(USART2, USART_IT_NE, ENABLE);
 	USART_ITConfig(USART2, USART_IT_ERR, ENABLE);
 	USART_Cmd(USART2, ENABLE);
 	USART_ClearFlag(USART2, USART_FLAG_TC);
@@ -155,7 +155,7 @@ void rt_hw_console_output(const char *str)
 {   
 	rt_size_t i = 0, size = 0;
 	char a = '\r';
-
+	return;
 	size = rt_strlen(str);
 	for (i = 0; i < size; i++)
 	{
