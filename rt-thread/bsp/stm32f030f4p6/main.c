@@ -10,7 +10,9 @@
 
 #include <rtthread.h>
 #include <stm32f0xx.h>
-
+struct rt_semaphore sem;
+rt_uint8_t uart_rcv[512];
+rt_uint16_t uart_rcv_len;
 void led_init()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -29,14 +31,14 @@ int main(void)
 {
 
     led_init();
-    while (1)
+	
+	rt_sem_init(&sem, "shrx", 0, 0);
+	while (1)
     {
-	GPIO_ResetBits(GPIOB,GPIO_Pin_1);
-        rt_thread_mdelay(500);
-//	rt_kprintf("led on\r\n");        
-	GPIO_SetBits(GPIOB,GPIO_Pin_1);
-        rt_thread_mdelay(500);
-//	rt_kprintf("led off\r\n");        
+//    	rt_hw_console_output("AT+H\r\n");
+    	rt_sem_take(&sem, RT_WAITING_FOREVER);
+		uart_rcv_len++;
+		uart_rcv[120] = 0x01;
     }
 }
 

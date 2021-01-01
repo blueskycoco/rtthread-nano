@@ -112,7 +112,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	I2C2_IRQHandler
 	IntDefaultHandler,    //	SPI1_IRQHandler
 	IntDefaultHandler,    //	SPI2_IRQHandler
-	IntDefaultHandler,    //	SPI2_IRQHandler
+	USART1_IRQHandler,    //	SPI2_IRQHandler
 	IntDefaultHandler,    //	USART2_IRQHandler
 	0,
 	0,
