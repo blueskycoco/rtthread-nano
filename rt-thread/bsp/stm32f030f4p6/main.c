@@ -13,6 +13,7 @@
 struct rt_semaphore sem;
 rt_uint8_t uart_rcv[512];
 rt_uint16_t uart_rcv_len;
+rt_uint8_t flag = 0;
 void led_init()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -43,7 +44,19 @@ int main(void)
 	while (1)
     {
 		rt_memset(uart_rcv, 0, 512);
-    	rt_hw_console_output1("AT+H\r\n");
+		if (flag == 0 || flag == 1) {
+    		flag++;
+    		rt_hw_console_output1("at+wsssid=xxx\n");
+		} else if (flag == 2) {
+    		flag++;
+    		rt_hw_console_output1("at+wskey=wpa2psk,aes,yyy\n");
+		} else if (flag == 3) {
+			flag++;
+    		rt_hw_console_output1("at+wslk\n");
+		} else if (flag == 4) {
+			flag++;
+    		rt_hw_console_output1("at+wslq\n");
+		}
     	rt_sem_take(&sem, RT_WAITING_FOREVER);
     }
 }
