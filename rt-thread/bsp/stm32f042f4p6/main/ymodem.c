@@ -126,7 +126,7 @@ static enum rym_code _rym_read_code(
         //if (rsz == 1)
         ctx->buf[0] = uart_rx_buf[0];
         uart_rx_set();
-        rt_kprintf("%s %d: code %x\r\n", __func__, __LINE__, ctx->buf[0]);
+        //rt_kprintf("%s %d: code %x\r\n", __func__, __LINE__, ctx->buf[0]);
         return (enum rym_code)(*ctx->buf);
     }
     while (1);
@@ -173,7 +173,7 @@ static rt_size_t _rym_putchar(struct rym_ctx *ctx, rt_uint8_t code)
     uart_tx_buf[0] = code;
     uart_tx_set();
     rt_sem_take(&sem, RT_WAITING_FOREVER);
-    rt_kprintf("%s %d: code %x\r\n", __func__, __LINE__, code);
+    //rt_kprintf("%s %d: code %x\r\n", __func__, __LINE__, code);
     return 1;
 }
 
@@ -208,7 +208,7 @@ static rt_err_t _rym_do_handshake(
             break;
         }
     }
-	rt_kprintf("%s %d: i %d, data_sz %d\r\n", __func__, __LINE__, i, data_sz);
+	//rt_kprintf("%s %d: i %d, data_sz %d\r\n", __func__, __LINE__, i, data_sz);
     if (i == tm_sec)
     {
         return -RYM_ERR_TMO;
@@ -269,8 +269,8 @@ static rt_err_t _rym_trans_data(
     {
         return -RYM_ERR_SEQ;
     }
-	rt_kprintf("%s %d: stage %x, buf[1] %x\r\n",
-			__func__, __LINE__, ctx->stage, ctx->buf[1]);
+	//rt_kprintf("%s %d: stage %x, buf[1] %x\r\n",
+			//__func__, __LINE__, ctx->stage, ctx->buf[1]);
     /* As we are sending C continuously, there is a chance that the
      * sender(remote) receive an C after sending the first handshake package.
      * So the sender will interpret it as NAK and re-send the package. So we
@@ -294,7 +294,7 @@ static rt_err_t _rym_trans_data(
     //    *code = ctx->on_data(ctx, ctx->buf + 3, data_sz);
     //else
         *code = RYM_CODE_ACK;
-    rt_kprintf("check passed\r\n");
+    //rt_kprintf("check passed\r\n");
     return RT_EOK;
 }
 

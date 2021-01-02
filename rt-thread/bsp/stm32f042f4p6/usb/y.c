@@ -130,7 +130,7 @@ int _rym_send_packet(
 	//for (i=0; i<133; i++)
 	//	printf("%x ", ctx->buf[i]);
 	//printf("\r\n");
-	printf("send_crc %x\r\n", send_crc);
+	//printf("send_crc %x\r\n", send_crc);
 	return 0;
 }
 
@@ -152,7 +152,7 @@ static size_t _rym_getchar(struct rym_ctx *ctx)
 		if (rsz != 64) {
 			continue;
 		}
-		printf("%s %d: getchar %x, len %d\r\n", __func__, __LINE__,uart_rx_buf[0], rsz);
+		//printf("%s %d: getchar %x, len %d\r\n", __func__, __LINE__,uart_rx_buf[0], rsz);
 		getc_ack = uart_rx_buf[0];
 		break;
 	}
@@ -214,7 +214,7 @@ int _rym_do_send_handshake(
 	}
 
 	ctx->stage = RYM_STAGE_ESTABLISHED;
-	printf("RYM_STAGE_ESTABLISHED\r\n");
+	//printf("RYM_STAGE_ESTABLISHED\r\n");
 	return 0;
 }
 
@@ -242,7 +242,7 @@ static int _rym_do_send_trans(struct rym_ctx *ctx)
 		ofs += (data_sz-5);
 		if (ofs >= g_file_len)
 			ctx->stage = RYM_STAGE_FINISHING;
-		printf("%s %d: sending %d %d...%d %d\r\n", __func__, __LINE__,index, ofs, g_file_len, ctx->stage);
+		//printf("%s %d: sending %d %d...%d %d\r\n", __func__, __LINE__,index, ofs, g_file_len, ctx->stage);
 		_rym_send_packet(ctx, code, index);
 		index++;
 		//rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
@@ -316,7 +316,7 @@ int _rym_do_send(
 	ctx->stage = RYM_STAGE_NONE;
 
 	handle = open_usb(0);
-	printf("%s %d\r\n", __func__, __LINE__);
+	//printf("%s %d\r\n", __func__, __LINE__);
 	hid_xfer(handle, 0x01, uart_tx_buf, 64, 1000);
 	err = _rym_do_send_handshake(ctx, handshake_timeout);
 	if (err != 0)
@@ -325,14 +325,14 @@ int _rym_do_send(
 		return err;
 	}
 
-	printf("%s %d\r\n", __func__, __LINE__);
+	//printf("%s %d\r\n", __func__, __LINE__);
 	err = _rym_do_send_trans(ctx);
 	if (err != 0)
 	{
 		close_usb(handle, 0);
 		return err;
 	}
-	printf("%s %d\r\n", __func__, __LINE__);
+	//printf("%s %d\r\n", __func__, __LINE__);
 
 	err = _rym_do_send_fin(ctx);
 	if (err != 0)
@@ -340,7 +340,7 @@ int _rym_do_send(
 		close_usb(handle, 0);
 		return err;
 	}
-	printf("%s %d\r\n", __func__, __LINE__);
+	//printf("%s %d\r\n", __func__, __LINE__);
 
 	return err;
 }
