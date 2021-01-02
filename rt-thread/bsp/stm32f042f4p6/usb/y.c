@@ -192,6 +192,7 @@ int _rym_do_send_handshake(
 	//if (ctx->on_begin && ctx->on_begin(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
 	//    return -RYM_ERR_CODE;
 	//printf("handshake ok\r\n");
+	//sleep(1);
 	code = RYM_CODE_SOH;
 	_rym_putchar(ctx, code);
     memset(ctx->buf+3, 0, data_sz-5);
@@ -242,7 +243,9 @@ static int _rym_do_send_trans(struct rym_ctx *ctx)
 		ofs += (data_sz-5);
 		if (ofs >= g_file_len)
 			ctx->stage = RYM_STAGE_FINISHING;
-		//printf("%s %d: sending %d %d...%d %d\r\n", __func__, __LINE__,index, ofs, g_file_len, ctx->stage);
+		printf("\033[1A");
+		printf("\033[K");
+		printf("%s %d: sending %d %d...%d %d\r\n", __func__, __LINE__,index, ofs, g_file_len, ctx->stage);
 		_rym_send_packet(ctx, code, index);
 		index++;
 		//rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);

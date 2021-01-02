@@ -113,11 +113,10 @@ static enum rym_code _rym_read_code(
     do
     {
         rt_size_t rsz;
-
         /* No data yet, wait for one */
         if (rt_sem_take(&sem, timeout) != RT_EOK) {
         	uart_rx_set();
-        	//rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
+        	rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
             return RYM_CODE_NONE;
 	}
 
@@ -196,7 +195,7 @@ static rt_err_t _rym_do_handshake(
     {
         _rym_putchar(ctx, RYM_CODE_C);
         code = _rym_read_code(ctx,
-                              RYM_CHD_INTV_TICK);
+                              100);//RYM_CHD_INTV_TICK);
         if (code == RYM_CODE_SOH)
         {
             data_sz = _RYM_SOH_PKG_SZ;
@@ -208,7 +207,7 @@ static rt_err_t _rym_do_handshake(
             break;
         }
     }
-	//rt_kprintf("%s %d: i %d, data_sz %d\r\n", __func__, __LINE__, i, data_sz);
+	rt_kprintf("%s %d: i %d, data_sz %d\r\n", __func__, __LINE__, i, data_sz);
     if (i == tm_sec)
     {
         return -RYM_ERR_TMO;
@@ -218,11 +217,11 @@ static rt_err_t _rym_do_handshake(
     i = 0;
     /* automatic exit after receiving specified length data, timeout: 100ms */
     tick = rt_tick_get();
-    while (rt_tick_get() <= (tick + rt_tick_from_millisecond(100)) && i < (data_sz))
-    {
+    //while (rt_tick_get() <= (tick + rt_tick_from_millisecond(100)) && i < (data_sz))
+    //{
         i += _rym_read_data(ctx, data_sz);
-        rt_thread_mdelay(5);
-    }
+    //    rt_thread_mdelay(5);
+    //}
 
     if (i != (data_sz))
         return -RYM_ERR_DSZ;
