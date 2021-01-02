@@ -12,7 +12,7 @@
 
 #include <rthw.h>
 #include "ymodem.h"
-
+#include <stdint.h>
 #ifdef YMODEM_USING_CRC_TABLE 
 static const rt_uint16_t ccitt_table[256] =
 {
@@ -117,7 +117,7 @@ static enum rym_code _rym_read_code(
         /* No data yet, wait for one */
         if (rt_sem_take(&sem, timeout) != RT_EOK) {
         	uart_rx_set();
-        	rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
+        	//rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
             return RYM_CODE_NONE;
 	}
 
@@ -154,44 +154,17 @@ static rt_size_t _rym_read_data(
 	    	readlen = len;
 	    }
         	uart_rx_set();
-        	rt_kprintf("%s %d: readlen %d, len %d\r\n", __func__, __LINE__, readlen, len);
+        	//rt_kprintf("%s %d: readlen %d, len %d\r\n", __func__, __LINE__, readlen, len);
         if (readlen >= len) {
-         	for (i=0; i<len; i++)
-         		rt_kprintf("%x ", buf[i]);
-         	rt_kprintf("\r\n");
+         	//for (i=0; i<len; i++)
+         	//	rt_kprintf("%x ", buf[i]);
+         	//rt_kprintf("\r\n");
          	return readlen;
 	}
     }
 
     uart_rx_set();
     return readlen;
-}
-
-static rt_err_t _rym_send_packet(
-    struct rym_ctx *ctx,
-    enum rym_code code,
-    rt_uint8_t index)
-{
-    rt_uint16_t send_crc;
-    rt_uint8_t index_inv = ~index;
-    rt_size_t writelen = 0;
-
-    send_crc = CRC16(ctx->buf + 3, _RYM_SOH_PKG_SZ - 5);
-    ctx->buf[0] = code;
-    ctx->buf[1] = index;
-    ctx->buf[2] = index_inv;
-    ctx->buf[131] = (rt_uint8_t)(send_crc >> 8);
-    ctx->buf[132] = (rt_uint8_t)send_crc & 0xff;
-
-    do
-    {
-        //writelen += rt_device_write(ctx->dev, 0, ctx->buf + writelen,
-        //                            _RYM_SOH_PKG_SZ - writelen);
-
-    }
-    while (writelen < _RYM_SOH_PKG_SZ);
-
-    return RT_EOK;
 }
 
 static rt_size_t _rym_putchar(struct rym_ctx *ctx, rt_uint8_t code)
@@ -204,19 +177,6 @@ static rt_size_t _rym_putchar(struct rym_ctx *ctx, rt_uint8_t code)
     return 1;
 }
 
-static rt_size_t _rym_getchar(struct rym_ctx *ctx)
-{
-    rt_uint8_t getc_ack;
-
-    //while (rt_device_read(ctx->dev, 0, &getc_ack, 1) != 1)
-    //{
-        rt_sem_take(&sem, RT_WAITING_FOREVER);
-        getc_ack = uart_rx_buf[0];
-        uart_rx_set();
-    //}
-    return getc_ack;
-}
-
 static rt_err_t _rym_do_handshake(
     struct rym_ctx *ctx,
     int tm_sec)
@@ -226,6 +186,9 @@ static rt_err_t _rym_do_handshake(
     rt_uint16_t recv_crc, cal_crc;
     rt_size_t data_sz;
     rt_tick_t tick;
+	rt_uint8_t fpath[32] = {0};
+	int j;
+	int flen;
 
     ctx->stage = RYM_STAGE_ESTABLISHING;
     /* send C every second, so the sender could know we are waiting for it. */
@@ -250,18 +213,18 @@ static rt_err_t _rym_do_handshake(
     {
         return -RYM_ERR_TMO;
     }
-	return RT_EOK;
+    
     /* receive all data */
     i = 0;
     /* automatic exit after receiving specified length data, timeout: 100ms */
     tick = rt_tick_get();
-    while (rt_tick_get() <= (tick + rt_tick_from_millisecond(100)) && i < (data_sz - 1))
+    while (rt_tick_get() <= (tick + rt_tick_from_millisecond(100)) && i < (data_sz))
     {
         i += _rym_read_data(ctx, data_sz);
         rt_thread_mdelay(5);
     }
 
-    if (i != (data_sz - 1))
+    if (i != (data_sz))
         return -RYM_ERR_DSZ;
 
     /* sanity check */
@@ -276,62 +239,15 @@ static rt_err_t _rym_do_handshake(
     /* congratulations, check passed. */
     //if (ctx->on_begin && ctx->on_begin(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_ACK)
     //    return -RYM_ERR_CAN;
-	rt_kprintf("handshake ok\r\n");
-    return RT_EOK;
-}
-
-static rt_err_t _rym_do_send_handshake(
-    struct rym_ctx *ctx,
-    int tm_sec)
-{
-    enum rym_code code;
-    rt_size_t i;
-    rt_size_t data_sz;
-    rt_uint8_t index = 0;
-    rt_uint8_t getc_ack;
-
-    ctx->stage = RYM_STAGE_ESTABLISHING;
-    data_sz = _RYM_SOH_PKG_SZ;
-
-    /* receive C every second */
-    for (i = 0; i < tm_sec; i++)
-    {
-        code = _rym_read_code(ctx,
-                              RYM_CHD_INTV_TICK);
-        if (code == RYM_CODE_C)
-        {
-            break;
-        }
-    }
-    if (i == tm_sec)
-    {
-        return -RYM_ERR_TMO;
-    }
-
-    /* congratulations, check passed. */
-    //if (ctx->on_begin && ctx->on_begin(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
-    //    return -RYM_ERR_CODE;
-	rt_kprintf("handshake ok\r\n");
-    code = RYM_CODE_SOH;
-    _rym_send_packet(ctx, code, index);
-
-    //rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
-    getc_ack = _rym_getchar(ctx);
-
-    if (getc_ack != RYM_CODE_ACK)
-    {
-        return -RYM_ERR_ACK;
-    }
-
-    getc_ack = _rym_getchar(ctx);
-
-    if (getc_ack != RYM_CODE_C)
-    {
-        return -RYM_ERR_ACK;
-    }
-
-    ctx->stage = RYM_STAGE_ESTABLISHED;
-	rt_kprintf("RYM_STAGE_ESTABLISHED\r\n");
+    fpath[0] = '/';
+    //rt_strncpy(&(fpath[1]), (const char *)(ctx->buf+3), data_sz - 6);
+    i = 3;
+    j = 1;
+    while (ctx->buf[i] != 0 && i < data_sz - 6) {
+		fpath[j++] = ctx->buf[i++];
+	}
+    flen = atoi(1 + (const char *)(ctx->buf+3) + rt_strnlen((const char *)(ctx->buf+3), data_sz - 6));
+	rt_kprintf("handshake ok, rcv name %s, len %d\r\n", fpath, flen);
     return RT_EOK;
 }
 
@@ -347,8 +263,8 @@ static rt_err_t _rym_trans_data(
     rt_size_t i = _rym_read_data(ctx, tsz);
     if (i != tsz)
         return -RYM_ERR_DSZ;
-	rt_kprintf("%s %d: read %d, buf[1] %x buf[2] %x\r\n",
-			__func__, __LINE__, i, ctx->buf[1], ctx->buf[2]);
+	//rt_kprintf("%s %d: read %d, buf[1] %x buf[2] %x\r\n",
+	//		__func__, __LINE__, i, ctx->buf[1], ctx->buf[2]);
     if ((ctx->buf[1] + ctx->buf[2]) != 0xFF)
     {
         return -RYM_ERR_SEQ;
@@ -368,8 +284,8 @@ static rt_err_t _rym_trans_data(
     ctx->stage = RYM_STAGE_TRANSMITTING;
     /* sanity check */
     recv_crc = (rt_uint16_t)(*(ctx->buf + tsz - 2) << 8) | *(ctx->buf + tsz-1);
-	rt_kprintf("%s %d crx %x, CRC16 %x\r\n", __func__, __LINE__, recv_crc,
-			CRC16(ctx->buf+3, data_sz));
+	//rt_kprintf("%s %d crx %x, CRC16 %x\r\n", __func__, __LINE__, recv_crc,
+	//		CRC16(ctx->buf+3, data_sz));
     if (recv_crc != CRC16(ctx->buf + 3, data_sz))
         return -RYM_ERR_CRC;
 
@@ -432,41 +348,6 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
             break;
         };
     }
-}
-
-static rt_err_t _rym_do_send_trans(struct rym_ctx *ctx)
-{
-    ctx->stage = RYM_STAGE_TRANSMITTING;
-    enum rym_code code;
-    rt_size_t data_sz;
-    rt_uint32_t index = 1;
-    rt_uint8_t getc_ack;
-
-    data_sz = _RYM_SOH_PKG_SZ;
-
-    while (1)
-    {
-        //if (ctx->on_data && ctx->on_data(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
-        //    return -RYM_ERR_CODE;
-	//read sending data
-        code = RYM_CODE_SOH;
-
-        _rym_send_packet(ctx, code, index);
-        index++;
-        //rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
-
-        getc_ack = _rym_getchar(ctx);
-
-        if (getc_ack != RYM_CODE_ACK)
-        {
-            return -RYM_ERR_ACK;
-        }
-
-        if (ctx->stage == RYM_STAGE_FINISHING)
-            break;
-    }
-
-    return RT_EOK;
 }
 
 static rt_err_t _rym_do_fin(struct rym_ctx *ctx)
@@ -533,51 +414,6 @@ static rt_err_t _rym_do_fin(struct rym_ctx *ctx)
     return RT_EOK;
 }
 
-static rt_err_t _rym_do_send_fin(struct rym_ctx *ctx)
-{
-    enum rym_code code;
-    rt_size_t data_sz;
-    rt_uint8_t index = 0;
-    rt_uint8_t getc_ack;
-
-    data_sz = _RYM_SOH_PKG_SZ;
-    //rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
-
-    _rym_putchar(ctx, RYM_CODE_EOT);
-    getc_ack = _rym_getchar(ctx);
-
-    if (getc_ack != RYM_CODE_NAK)
-    {
-        return -RYM_ERR_ACK;
-    }
-
-    _rym_putchar(ctx, RYM_CODE_EOT);
-    getc_ack = _rym_getchar(ctx);
-
-    if (getc_ack != RYM_CODE_ACK)
-    {
-        return -RYM_ERR_ACK;
-    }
-
-    getc_ack = _rym_getchar(ctx);
-
-    if (getc_ack != RYM_CODE_C)
-    {
-        return -RYM_ERR_ACK;
-    }
-	memset(ctx->buf+3, 0, data_sz - 5);
-    //if (ctx->on_end && ctx->on_end(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
-    //    return -RYM_ERR_CODE;
-
-    code = RYM_CODE_SOH;
-
-    _rym_send_packet(ctx, code, index);
-
-    ctx->stage = RYM_STAGE_FINISHED;
-
-    return RT_EOK;
-}
-
 rt_err_t _rym_do_recv(
     struct rym_ctx *ctx,
     int handshake_timeout)
@@ -615,43 +451,6 @@ rt_err_t _rym_do_recv(
         if (ctx->stage == RYM_STAGE_FINISHED)
             break;
     }
-    //rt_free(ctx->buf);
-    return err;
-}
-
-static rt_err_t _rym_do_send(
-    struct rym_ctx *ctx,
-    int handshake_timeout)
-{
-    rt_err_t err;
-
-    ctx->stage = RYM_STAGE_NONE;
-
-    //ctx->buf = rt_malloc(_RYM_STX_PKG_SZ);
-    //if (ctx->buf == RT_NULL)
-    //    return -RT_ENOMEM;
-
-    err = _rym_do_send_handshake(ctx, handshake_timeout);
-    if (err != RT_EOK)
-    {
-        //rt_free(ctx->buf);
-        return err;
-    }
-
-    err = _rym_do_send_trans(ctx);
-    if (err != RT_EOK)
-    {
-        //rt_free(ctx->buf);
-        return err;
-    }
-
-    err = _rym_do_send_fin(ctx);
-    if (err != RT_EOK)
-    {
-        //rt_free(ctx->buf);
-        return err;
-    }
-
     //rt_free(ctx->buf);
     return err;
 }

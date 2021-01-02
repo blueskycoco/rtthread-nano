@@ -1,14 +1,3 @@
-/*
- * COPYRIGHT (C) 2012, Real-Thread Information Technology Ltd
- * All rights reserved
- *
- * SPDX-License-Identifier: Apache-2.0
- *
- * Change Logs:
- * Date           Author       Notes
- * 2013-04-14     Grissiom     initial implementation
- * 2019-12-09     Steven Liu   add YMODEM send protocol
- */
 #include <unistd.h>
 #include "y.h"
 #include "lusb0_usb.h"
@@ -88,14 +77,9 @@ static uint16_t CRC16(unsigned char *q, int len)
 // we could only use global varible because we could not use
 // rt_device_t->user_data(it is used by the serial driver)...
 static struct rym_ctx *_rym_the_ctx;
-
+uint8_t file_name[64];
 uint8_t uart_rx_buf[64];
 uint8_t uart_tx_buf[64];
-
-//static rt_err_t _rym_rx_ind(rt_device_t dev, size_t size)
-//{
-//    return rt_sem_release(&_rym_the_ctx->sem);
-//}
 
 /* SOH/STX + seq + payload + crc */
 #define _RYM_SOH_PKG_SZ (1+2+128+2)
@@ -105,10 +89,6 @@ static enum rym_code _rym_read_code(
 		struct rym_ctx *ctx,
 		int timeout)
 {
-	/* Fast path */
-	//if (rt_device_read(ctx->dev, 0, ctx->buf, 1) == 1)
-	//    return (enum rym_code)(*ctx->buf);
-
 	/* Slow path */
 	do
 	{
@@ -117,7 +97,7 @@ static enum rym_code _rym_read_code(
 		/* No data yet, wait for one */
 
 		rsz = hid_xfer(handle, 0x81, uart_rx_buf, 64, 1000);
-		printf("%s %d: rsz %d %x\r\n", __func__, __LINE__, rsz, uart_rx_buf[0]);
+		//printf("%s %d: rsz %d %x\r\n", __func__, __LINE__, rsz, uart_rx_buf[0]);
 		if (rsz != 64) {
 			return RYM_CODE_NONE;
 		}
@@ -144,14 +124,6 @@ int _rym_send_packet(
 	ctx->buf[131] = (uint8_t)(send_crc >> 8);
 	ctx->buf[132] = (uint8_t)send_crc & 0xff;
 
-	//do
-	//{
-	//writelen += rt_device_write(ctx->dev, 0, ctx->buf + writelen,
-	//                            _RYM_SOH_PKG_SZ - writelen);
-
-	//}
-	//while (writelen < _RYM_SOH_PKG_SZ);
-
 	hid_xfer(handle, 0x01, ctx->buf, 64, 1000);
 	hid_xfer(handle, 0x01, ctx->buf+64, 64, 1000);
 	hid_xfer(handle, 0x01, ctx->buf+128, 64, 1000);
@@ -164,11 +136,9 @@ int _rym_send_packet(
 
 static size_t _rym_putchar(struct rym_ctx *ctx, uint8_t code)
 {
-	//rt_device_write(ctx->dev, 0, &code, sizeof(code));
 	uart_tx_buf[0] = code;
 	hid_xfer(handle, 0x01, uart_tx_buf, 64, 1000);
 
-	//uart_tx_set();
 	return 1;
 }
 
@@ -176,9 +146,7 @@ static size_t _rym_getchar(struct rym_ctx *ctx)
 {
 	uint8_t getc_ack;
 	int rsz;
-	//while (rt_device_read(ctx->dev, 0, &getc_ack, 1) != 1)
-	//{
-	//rt_sem_take(&sem, RT_WAITING_FOREVER);
+	
 	while (1) {
 		rsz = hid_xfer(handle, 0x81, uart_rx_buf, 64, 1000);
 		if (rsz != 64) {
@@ -188,7 +156,6 @@ static size_t _rym_getchar(struct rym_ctx *ctx)
 		getc_ack = uart_rx_buf[0];
 		break;
 	}
-	//}
 	return getc_ack;
 }
 
@@ -201,6 +168,7 @@ int _rym_do_send_handshake(
 	size_t data_sz;
 	uint8_t index = 0;
 	uint8_t getc_ack;
+    char insert_0 = '\0';
 
 	ctx->stage = RYM_STAGE_ESTABLISHING;
 	data_sz = _RYM_SOH_PKG_SZ;
@@ -225,8 +193,10 @@ int _rym_do_send_handshake(
 	//    return -RYM_ERR_CODE;
 	//printf("handshake ok\r\n");
 	code = RYM_CODE_SOH;
-	//_rym_send_packet(ctx, code, index);
 	_rym_putchar(ctx, code);
+    memset(ctx->buf+3, 0, data_sz-5);
+    sprintf((char *)(ctx->buf+3), "%s%c%ld", (char *)file_name, insert_0, g_file_len);
+	_rym_send_packet(ctx, code, index);
 	//rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
 	getc_ack = _rym_getchar(ctx);
 
@@ -394,6 +364,7 @@ int main(int argc, void *argv[])
 {
 	struct rym_ctx ctx;
 	read_file(argv[1]);
+	strcpy(file_name, argv[1]);
 	_rym_do_send(&ctx, 10);
 	free(send_file);
 	return 0;

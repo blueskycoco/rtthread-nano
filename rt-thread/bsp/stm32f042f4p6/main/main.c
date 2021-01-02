@@ -60,11 +60,11 @@ int main(void)
 	//		&USR_cb);
 #if 1
 	rt_sem_take(&sem, RT_WAITING_FOREVER);
-	rt_kprintf("got uart data\r\n");
-	for (i=0; i<64; i++) {
-		rt_kprintf("%c", uart_rx_buf[i]);
-	}
-	rt_kprintf("\r\n");
+	//rt_kprintf("got uart data\r\n");
+	//for (i=0; i<64; i++) {
+	//	rt_kprintf("%c", uart_rx_buf[i]);
+	//}
+	//rt_kprintf("\r\n");
 	uart_rx_set();
 	_rym_do_recv(&ctx, RT_WAITING_FOREVER);
 #endif
