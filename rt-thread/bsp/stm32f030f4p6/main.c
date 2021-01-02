@@ -26,19 +26,25 @@ void led_init()
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
-
+void enter_at_mode()
+{
+	rt_hw_console_output1("+++");
+	rt_thread_mdelay(100);
+	rt_hw_console_output1("a");
+	rt_thread_mdelay(100);
+}
 int main(void)
 {
 
     led_init();
 	
 	rt_sem_init(&sem, "shrx", 0, 0);
+	enter_at_mode();
 	while (1)
     {
-//    	rt_hw_console_output("AT+H\r\n");
+		rt_memset(uart_rcv, 0, 512);
+    	rt_hw_console_output1("AT+H\r\n");
     	rt_sem_take(&sem, RT_WAITING_FOREVER);
-		uart_rcv_len++;
-		uart_rcv[120] = 0x01;
     }
 }
 

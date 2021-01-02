@@ -80,19 +80,20 @@ void USART1_IRQHandler(void)
 
 	if(USART_GetFlagStatus(USART1, USART_FLAG_RTO) != RESET)
 	{
-		USART_ClearFlag(USART1,USART_FLAG_ORE);
+		USART_ClearFlag(USART1,USART_FLAG_RTO);
 		USART_ReceiverTimeOutCmd(USART1, DISABLE);
 		DMA_Cmd(DMA1_Channel3, DISABLE);
-		uart_rcv_len = 511 - DMA1_Channel3->CNDTR;
-		//rt_sem_release(&sem);
+		uart_rcv_len = 512 - DMA1_Channel3->CNDTR;
+		rt_sem_release(&sem);
 		USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 	}
 
 	if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET)
 	{
-		uart_rcv[0] = USART_ReceiveData(USART1) & 0xff;
-		DMA1_Channel3->CNDTR = 511;
-		DMA1_Channel3->CMAR = (uint32_t)(uart_rcv+1);
+		USART_ClearFlag(USART1,USART_FLAG_RXNE);
+		//uart_rcv[0] = USART_ReceiveData(USART1) & 0xff;
+		DMA1_Channel3->CNDTR = 512;
+		DMA1_Channel3->CMAR = (uint32_t)(uart_rcv);
 		DMA_Cmd(DMA1_Channel3, ENABLE);
 		USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 		USART_ReceiverTimeOutCmd(USART1, ENABLE);
@@ -109,15 +110,22 @@ static int uart_init(void)
 
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+#if 0
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_1);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_1);
-
+#else
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
+#endif
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-
+#if 0
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
+#else
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+#endif
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -166,7 +174,7 @@ static int uart_init(void)
 
 INIT_BOARD_EXPORT(uart_init);
 
-void rt_hw_console_output(const char *str)
+void rt_hw_console_output1(const char *str)
 {   
 	rt_size_t i = 0, size = 0;
 	char a = '\r';
