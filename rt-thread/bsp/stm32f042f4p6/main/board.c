@@ -73,11 +73,11 @@ static int uart_init(void)
 
     USART_InitTypeDef USART_InitStructure;
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_1);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_1);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
+    GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9 | GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -91,11 +91,11 @@ static int uart_init(void)
     USART_InitStructure.USART_HardwareFlowControl = 
 	USART_HardwareFlowControl_None;
     USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-    USART_Init(USART1, &USART_InitStructure);
+    USART_Init(USART2, &USART_InitStructure);
 
-    USART_SetReceiverTimeOut(USART1, 115200/4);
-    USART_ReceiverTimeOutCmd(USART1, ENABLE);
-    USART_Cmd(USART1, ENABLE);
+    USART_SetReceiverTimeOut(USART2, 115200/4);
+    USART_ReceiverTimeOutCmd(USART2, ENABLE);
+    USART_Cmd(USART2, ENABLE);
     return 0;
 }
 
@@ -111,18 +111,18 @@ void rt_hw_console_output(const char *str)
     {
 	if (*(str + i) == '\n')
 	{
-	    USART_SendData(USART1, a);
-	    while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
+	    USART_SendData(USART2, a);
+	    while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET); 
 	}
-	USART_SendData(USART1, *(uint8_t *)(str + i));
-	while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
+	USART_SendData(USART2, *(uint8_t *)(str + i));
+	while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET); 
     }
 }
 
 char rt_hw_console_getchar(void)
 {
     int8_t ch = -1;
-    if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
-	ch = USART_ReceiveData(USART1) & 0xff;
+    if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == SET)
+	ch = USART_ReceiveData(USART2) & 0xff;
     return ch;
 }

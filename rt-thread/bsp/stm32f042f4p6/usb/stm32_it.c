@@ -60,13 +60,6 @@ void NMI_Handler(void)
   * @param  None
   * @retval None
   */
-void HardFault_Handler(void)
-{
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
-}
 
 /**
   * @brief  This function handles SVCall exception.
@@ -82,18 +75,12 @@ void SVC_Handler(void)
   * @param  None
   * @retval None
   */
-void PendSV_Handler(void)
-{
-}
 
 /**
   * @brief  This function handles SysTick Handler.
   * @param  None
   * @retval None
   */
-void SysTick_Handler(void)
-{ 
-} 
 
 /**
   * @brief  This function handles USB FS Handler.
@@ -113,12 +100,13 @@ void USB_IRQHandler(void)
 void EXTI4_15_IRQHandler(void)
 {
   
-  if (EXTI_GetITStatus(TAMPER_BUTTON_EXTI_LINE) != RESET)
+#if 0
+ 	if (EXTI_GetITStatus(TAMPER_BUTTON_EXTI_LINE) != RESET)
   {
     if((PrevXferDone)  && (USB_Device_dev.dev.device_status==USB_CONFIGURED))
     {
       Send_Buffer[0] = 0x06; 
-      
+  /*    
       if (STM_EVAL_PBGetState(BUTTON_TAMPER) == Bit_RESET)
       {
         Send_Buffer[1] = 0x01;
@@ -127,7 +115,7 @@ void EXTI4_15_IRQHandler(void)
       {
         Send_Buffer[1] = 0x00;
       }
-
+*/
       USBD_HID_SendReport (&USB_Device_dev, Send_Buffer, 2);  
       PrevXferDone = 0;
     }
@@ -135,6 +123,7 @@ void EXTI4_15_IRQHandler(void)
     /* Clear the EXTI line pending bit */
     EXTI_ClearITPendingBit(TAMPER_BUTTON_EXTI_LINE);
   }
+#endif
 }
 
 /**

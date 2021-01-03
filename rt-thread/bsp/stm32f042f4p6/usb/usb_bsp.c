@@ -92,17 +92,17 @@ void USB_BSP_Init(USB_CORE_HANDLE *pdev)
 #endif /*USB_CLOCK_SOURCE_CRS */ 
   
   /* Configure the Tamper button in EXTI mode */
-  STM_EVAL_PBInit(BUTTON_TAMPER, Mode_EXTI);
+ // STM_EVAL_PBInit(BUTTON_TAMPER, Mode_EXTI);
   
   /* Configure Tamper EXTI line to generate an interrupt on rising & falling edges */ 
-  EXTI_InitStructure.EXTI_Line = TAMPER_BUTTON_EXTI_LINE;
-  EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
-  EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-  EXTI_Init(&EXTI_InitStructure);
+  //EXTI_InitStructure.EXTI_Line = TAMPER_BUTTON_EXTI_LINE;
+ // EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+  //EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
+  //EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+  //EXTI_Init(&EXTI_InitStructure);
   
   /* Clear the Tamper EXTI line pending bit */
-  EXTI_ClearITPendingBit(TAMPER_BUTTON_EXTI_LINE);
+  //EXTI_ClearITPendingBit(TAMPER_BUTTON_EXTI_LINE);
   
 #ifdef USB_DEVICE_LOW_PWR_MGMT_SUPPORT  
   
@@ -137,10 +137,10 @@ void USB_BSP_EnableInterrupt(USB_CORE_HANDLE *pdev)
   NVIC_Init(&NVIC_InitStructure);
   
     /* Enable the Tamper EXTI line Interrupt */
-  NVIC_InitStructure.NVIC_IRQChannel = TAMPER_BUTTON_EXTI_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+  //NVIC_InitStructure.NVIC_IRQChannel = TAMPER_BUTTON_EXTI_IRQn;
+  //NVIC_InitStructure.NVIC_IRQChannelPriority = 0;
+  //NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  //NVIC_Init(&NVIC_InitStructure);
   
     /* Enable the DMA1 Channel1 Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;

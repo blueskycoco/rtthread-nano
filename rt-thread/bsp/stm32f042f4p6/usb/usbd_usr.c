@@ -60,13 +60,13 @@ static void ADC_Configuration(void);
 void USBD_USR_Init(void)
 {   
   /* Initialize LEDs */
-  STM_EVAL_LEDInit(LED1);
-  STM_EVAL_LEDInit(LED2);
-  STM_EVAL_LEDInit(LED3);
-  STM_EVAL_LEDInit(LED4);
+//  STM_EVAL_LEDInit(LED1);
+//  STM_EVAL_LEDInit(LED2);
+//  STM_EVAL_LEDInit(LED3);
+//  STM_EVAL_LEDInit(LED4);
   
   /* Configure the ADC*/
-  ADC_Configuration();
+//  ADC_Configuration();
   
 }
 

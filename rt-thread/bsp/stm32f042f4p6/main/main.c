@@ -10,7 +10,10 @@
 
 #include <rtthread.h>
 #include <stm32f0xx.h>
+#include "usbd_custom_hid_core.h"
+#include  "usbd_usr.h"
 
+USB_CORE_HANDLE  USB_Device_dev ;
 void led_init()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -27,8 +30,15 @@ void led_init()
 
 int main(void)
 {
+	rt_kprintf("sys clk %d\r\n", SystemCoreClock);
+   led_init();
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+  SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;
 
-    led_init();
+   USBD_Init(&USB_Device_dev,
+            &USR_desc, 
+            &USBD_HID_cb, 
+            &USR_cb);
     while (1)
     {
 	GPIO_ResetBits(GPIOB,GPIO_Pin_1);
