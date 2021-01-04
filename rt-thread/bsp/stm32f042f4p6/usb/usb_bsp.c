@@ -47,8 +47,6 @@
 
 void USB_BSP_Init(USB_CORE_HANDLE *pdev)
 {
-  EXTI_InitTypeDef EXTI_InitStructure;
-
   /* Enable USB clock */
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
   

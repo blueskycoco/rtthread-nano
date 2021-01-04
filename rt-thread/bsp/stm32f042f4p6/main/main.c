@@ -46,42 +46,17 @@ void uart_rx_set()
 }
 int main(void)
 {
-	int i = 0;
 	uint8_t flag = 0;
 	rt_sem_init(&sem, "shrx", 0, 0);
-	//	rt_kprintf("sys clk %d\r\n", SystemCoreClock);
 	led_init();
-	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
-	//SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;
 
-	//USBD_Init(&USB_Device_dev,
-	//		&USR_desc, 
-	//		&USBD_HID_cb, 
-	//		&USR_cb);
-#if 1
+	/* waiting to enter ymodem */
+
 	rt_sem_take(&sem, RT_WAITING_FOREVER);
-	//rt_kprintf("got uart data\r\n");
-	//for (i=0; i<64; i++) {
-	//	rt_kprintf("%c", uart_rx_buf[i]);
-	//}
-	//rt_kprintf("\r\n");
 	uart_rx_set();
 	_rym_do_recv(&ctx, RT_WAITING_FOREVER);
-#endif
 	while (1)
 	{
-#if 0
-		rt_sem_take(&sem, RT_WAITING_FOREVER);
-//		rt_kprintf("got uart data\r\n");
-//		for (i=0; i<64; i++) {
-//			rt_kprintf("%c", uart_rx_buf[i]);
-//		}
-//		rt_kprintf("\r\n");
-		rt_memcpy(uart_tx_buf, uart_rx_buf, 64);
-		uart_tx_set();
-		uart_rx_set();
-		//uart_recover();
-#endif
 		if (flag == 1) {
 			GPIO_ResetBits(GPIOB,GPIO_Pin_1);
 			flag = 0;

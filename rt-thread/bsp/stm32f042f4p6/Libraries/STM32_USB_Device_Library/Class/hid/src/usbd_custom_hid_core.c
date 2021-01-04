@@ -519,7 +519,7 @@ uint8_t  USBD_HID_DataOut (void  *pdev,
 {
 	if (PrevTxDone) {
 		PrevTxDone = 0;
-		int len = ((USB_CORE_HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
+		//int len = ((USB_CORE_HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
 		rt_memcpy(uart_tx_buf, Report_buf, 64);
 		//DMA_Cmd(DMA1_Channel4, DISABLE);
 		DMA1_Channel4->CNDTR = 64;

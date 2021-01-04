@@ -74,8 +74,6 @@ static uint16_t CRC16(unsigned char *q, int len)
 }
 #endif
 
-// we could only use global varible because we could not use
-// rt_device_t->user_data(it is used by the serial driver)...
 static struct rym_ctx *_rym_the_ctx;
 uint8_t file_name[64];
 uint8_t uart_rx_buf[64];
@@ -97,7 +95,6 @@ static enum rym_code _rym_read_code(
 		/* No data yet, wait for one */
 
 		rsz = hid_xfer(handle, 0x81, uart_rx_buf, 64, 1000);
-		//printf("%s %d: rsz %d %x\r\n", __func__, __LINE__, rsz, uart_rx_buf[0]);
 		if (rsz != 64) {
 			return RYM_CODE_NONE;
 		}
@@ -127,10 +124,6 @@ int _rym_send_packet(
 	hid_xfer(handle, 0x01, ctx->buf, 64, 1000);
 	hid_xfer(handle, 0x01, ctx->buf+64, 64, 1000);
 	hid_xfer(handle, 0x01, ctx->buf+128, 64, 1000);
-	//for (i=0; i<133; i++)
-	//	printf("%x ", ctx->buf[i]);
-	//printf("\r\n");
-	//printf("send_crc %x\r\n", send_crc);
 	return 0;
 }
 
@@ -146,13 +139,12 @@ static size_t _rym_getchar(struct rym_ctx *ctx)
 {
 	uint8_t getc_ack;
 	int rsz;
-	
+
 	while (1) {
 		rsz = hid_xfer(handle, 0x81, uart_rx_buf, 64, 1000);
 		if (rsz != 64) {
 			continue;
 		}
-		//printf("%s %d: getchar %x, len %d\r\n", __func__, __LINE__,uart_rx_buf[0], rsz);
 		getc_ack = uart_rx_buf[0];
 		break;
 	}
@@ -168,7 +160,7 @@ int _rym_do_send_handshake(
 	size_t data_sz;
 	uint8_t index = 0;
 	uint8_t getc_ack;
-    char insert_0 = '\0';
+	char insert_0 = '\0';
 
 	ctx->stage = RYM_STAGE_ESTABLISHING;
 	data_sz = _RYM_SOH_PKG_SZ;
@@ -189,16 +181,12 @@ int _rym_do_send_handshake(
 	}
 
 	/* congratulations, check passed. */
-	//if (ctx->on_begin && ctx->on_begin(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
-	//    return -RYM_ERR_CODE;
-	//printf("handshake ok\r\n");
-	//sleep(1);
 	code = RYM_CODE_SOH;
 	_rym_putchar(ctx, code);
-    memset(ctx->buf+3, 0, data_sz-5);
-    sprintf((char *)(ctx->buf+3), "%s%c%ld", (char *)file_name, insert_0, g_file_len);
+	memset(ctx->buf+3, 0, data_sz-5);
+	sprintf((char *)(ctx->buf+3), "%s%c%ld", (char *)file_name, insert_0,
+				g_file_len);
 	_rym_send_packet(ctx, code, index);
-	//rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
 	getc_ack = _rym_getchar(ctx);
 
 	if (getc_ack != RYM_CODE_ACK)
@@ -206,7 +194,6 @@ int _rym_do_send_handshake(
 		return -RYM_ERR_ACK;
 	}
 
-	//printf("handshake ok 1\r\n");
 	getc_ack = _rym_getchar(ctx);
 
 	if (getc_ack != RYM_CODE_C)
@@ -215,7 +202,6 @@ int _rym_do_send_handshake(
 	}
 
 	ctx->stage = RYM_STAGE_ESTABLISHED;
-	//printf("RYM_STAGE_ESTABLISHED\r\n");
 	return 0;
 }
 
@@ -231,8 +217,6 @@ static int _rym_do_send_trans(struct rym_ctx *ctx)
 
 	while (1)
 	{
-		//if (ctx->on_data && ctx->on_data(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
-		//    return -RYM_ERR_CODE;
 		//read sending data
 		_rym_putchar(ctx, RYM_CODE_SOH);
 		code = RYM_CODE_SOH;
@@ -245,10 +229,10 @@ static int _rym_do_send_trans(struct rym_ctx *ctx)
 			ctx->stage = RYM_STAGE_FINISHING;
 		printf("\033[1A");
 		printf("\033[K");
-		printf("%s %d: sending %d %d...%d %d\r\n", __func__, __LINE__,index, ofs, g_file_len, ctx->stage);
+		printf("%s %d: sending %d %d...%d %d\r\n", __func__, __LINE__,
+				index, ofs, g_file_len, ctx->stage);
 		_rym_send_packet(ctx, code, index);
 		index++;
-		//rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
 
 		getc_ack = _rym_getchar(ctx);
 
@@ -272,7 +256,6 @@ static int _rym_do_send_fin(struct rym_ctx *ctx)
 	uint8_t getc_ack;
 
 	data_sz = _RYM_SOH_PKG_SZ;
-	//rt_device_set_rx_indicate(ctx->dev, _rym_rx_ind);
 
 	_rym_putchar(ctx, RYM_CODE_EOT);
 	getc_ack = _rym_getchar(ctx);
@@ -297,11 +280,9 @@ static int _rym_do_send_fin(struct rym_ctx *ctx)
 		return -RYM_ERR_ACK;
 	}
 	memset(ctx->buf+3, 0, data_sz - 5);
-	//if (ctx->on_end && ctx->on_end(ctx, ctx->buf + 3, data_sz - 5) != RYM_CODE_SOH)
-	//    return -RYM_ERR_CODE;
 
 	code = RYM_CODE_SOH;
-	
+
 	_rym_putchar(ctx, RYM_CODE_SOH);
 	_rym_send_packet(ctx, code, index);
 
@@ -319,7 +300,7 @@ int _rym_do_send(
 	ctx->stage = RYM_STAGE_NONE;
 
 	handle = open_usb(0);
-	//printf("%s %d\r\n", __func__, __LINE__);
+
 	hid_xfer(handle, 0x01, uart_tx_buf, 64, 1000);
 	err = _rym_do_send_handshake(ctx, handshake_timeout);
 	if (err != 0)
@@ -328,14 +309,12 @@ int _rym_do_send(
 		return err;
 	}
 
-	//printf("%s %d\r\n", __func__, __LINE__);
 	err = _rym_do_send_trans(ctx);
 	if (err != 0)
 	{
 		close_usb(handle, 0);
 		return err;
 	}
-	//printf("%s %d\r\n", __func__, __LINE__);
 
 	err = _rym_do_send_fin(ctx);
 	if (err != 0)
@@ -343,7 +322,6 @@ int _rym_do_send(
 		close_usb(handle, 0);
 		return err;
 	}
-	//printf("%s %d\r\n", __func__, __LINE__);
 
 	return err;
 }
@@ -353,7 +331,7 @@ int read_file(const uint8_t *file)
 	fseek(fp,0L,SEEK_END);
 	int flen=ftell(fp);
 	fseek(fp,0L,SEEK_SET);
-	
+
 	g_file_len = flen;
 
 	send_file = (uint8_t *)malloc(flen*sizeof(uint8_t));
