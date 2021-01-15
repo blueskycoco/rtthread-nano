@@ -36,28 +36,23 @@ include ${ROOT}/makedefs
 # Where to find header files that do not live in the source directory.
 #
 IPATH = ./
+IPATH = ./main
 IPATH += ./inc
 IPATH += ./Libraries/CMSIS/Include
-IPATH += ./Libraries/CMSIS/Device/ST/STM32F0xx/Include
-IPATH += ./Libraries/STM32_USB_Device_Driver/inc
-IPATH += ./Libraries/STM32_USB_Device_Library/Class/hid/inc
-IPATH += ./Libraries/STM32_USB_Device_Library/Core/inc
-IPATH += ./Libraries/STM32F0xx_StdPeriph_Driver/inc
+IPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Include
+IPATH += ./Libraries/STM32F4xx_StdPeriph_Driver/inc
 IPATH += ../../include
 IPATH += ../../components/finsh
 
 VPATH = .
 VPATH += ./main
-VPATH += ./usb
-VPATH += ./Libraries/STM32F0xx_StdPeriph_Driver/src
-VPATH += ./Libraries/STM32_USB_Device_Library/Class/hid/src
-VPATH += ./Libraries/STM32_USB_Device_Library/Core/src
-VPATH += ./Libraries/STM32_USB_Device_Driver/src
-VPATH += ./Libraries/CMSIS/Device/ST/STM32F0xx/Source/Templates
+VPATH += ./Libraries/STM32F4xx_StdPeriph_Driver/src
+VPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates
+VPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7
 VPATH += ./libraries
 VPATH += ../../src
 VPATH += ../../components/finsh
-VPATH += ../../libcpu/arm/cortex-m0
+VPATH += ../../libcpu/arm/cortex-m4
 #
 # The default rule, which causes the rtthread example to be built.
 #
@@ -82,50 +77,34 @@ ${COMPILER}:
 # Rules for building the rtthread example.
 #
 #init
-${COMPILER}/rtthread.axf: ${COMPILER}/startup_${COMPILER}_042f4p6.o
-${COMPILER}/rtthread.axf: ${COMPILER}/system_stm32f0xx.o
+${COMPILER}/rtthread.axf: ${COMPILER}/startup_stm32f446xx.o
+${COMPILER}/rtthread.axf: ${COMPILER}/system_stm32f4xx.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/main.o
-#${COMPILER}/rtthread.axf: ${COMPILER}/imu.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/board.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/ymodem.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32_it.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usb_bsp.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_desc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_pwr.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_usr.o
-#${COMPILER}/rtthread.axf: ${COMPILER}/imu_jump_detection-gyro.o
-#${COMPILER}/rtthread.axf: ${COMPILER}/imu_jump_detection.o
+#${COMPILER}/rtthread.axf: ${COMPILER}/stm32_it.o
 #driver
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_gpio.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_misc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_adc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_comp.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_can.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_cec.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_crc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_dac.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_dbgmcu.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_dma.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_exti.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_flash.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_crs.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_i2c.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_iwdg.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_pwr.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_rcc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_rtc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_syscfg.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_spi.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_tim.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_usart.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f0xx_wwdg.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_custom_hid_core.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_core.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_ioreq.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usbd_req.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usb_core.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usb_dcd.o
-${COMPILER}/rtthread.axf: ${COMPILER}/usb_dcd_int.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_gpio.o
+${COMPILER}/rtthread.axf: ${COMPILER}/misc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_adc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_can.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cec.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_crc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dac.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dbgmcu.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dma.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_exti.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_flash.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_i2c.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_iwdg.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_pwr.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_rcc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_rtc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_syscfg.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_spi.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_tim.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_usart.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_wwdg.o
 #rtthread
 ${COMPILER}/rtthread.axf: ${COMPILER}/clock.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/components.o
@@ -149,7 +128,7 @@ ${COMPILER}/rtthread.axf: rtthread.ld
 SCATTERgcc_rtthread=rtthread.ld
 ENTRY_rtthread=Reset_Handler
 #CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F10X_HD -DMASTER
-CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F042
+CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F446xx
 #
 # Include the automatically generated dependency files.
 #

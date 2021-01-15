@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include <rthw.h>
 #include <rtthread.h>
-#include <system_stm32f0xx.h>
-#include <stm32f0xx.h>
+#include <system_stm32f4xx.h>
+#include <stm32f4xx.h>
 extern void SystemCoreClockUpdate(void);
 #define USART2_RDR_Address    0x40004424
 #define USART2_TDR_Address    0x40004428
@@ -68,12 +68,13 @@ void SysTick_Handler(void)
 	/* leave interrupt */
 	rt_interrupt_leave();
 }
+#if 0
 static void uart_dma_config()
 {
 	DMA_InitTypeDef  DMA_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 	DMA_InitStructure.DMA_BufferSize = 64;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
 	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
@@ -111,25 +112,29 @@ static void uart_dma_config()
 	DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);
 	DMA_ITConfig(DMA1_Channel5, DMA_IT_TC, ENABLE);
 }
+#endif
 static int uart_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	USART_InitTypeDef USART_InitStructure;
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_1);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_1);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_1);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_1);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource8, GPIO_AF_USART3);
+	GPIO_PinAFConfig(GPIOD, GPIO_PinSource9, GPIO_AF_USART3);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_USART6);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_USART6);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3 | GPIO_Pin_9 | GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	USART_InitStructure.USART_BaudRate = 2000000;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -138,45 +143,46 @@ static int uart_init(void)
 	USART_InitStructure.USART_HardwareFlowControl = 
 		USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	USART_Init(USART2, &USART_InitStructure);
-	USART_Init(USART1, &USART_InitStructure);
+	USART_Init(USART3, &USART_InitStructure);
+	USART_Init(USART6, &USART_InitStructure);
 
-	uart_dma_config();
+	//uart_dma_config();
 
-	USART_ITConfig(USART2, USART_IT_ORE, ENABLE);	
-	USART_ITConfig(USART2, USART_IT_ERR, ENABLE);	
+	USART_ITConfig(USART6, USART_IT_ORE, ENABLE);	
+	USART_ITConfig(USART6, USART_IT_ERR, ENABLE);	
 	
-	USART_Cmd(USART2, ENABLE);
-	USART_ClearFlag(USART2, USART_FLAG_TC);
-	USART_Cmd(USART1, ENABLE);
-	USART_ClearFlag(USART1, USART_FLAG_TC);
+	USART_Cmd(USART6, ENABLE);
+	USART_ClearFlag(USART6, USART_FLAG_TC);
+	USART_Cmd(USART3, ENABLE);
+	USART_ClearFlag(USART3, USART_FLAG_TC);
 	return 0;
 }
 
-INIT_BOARD_EXPORT(uart_init);
+//INIT_BOARD_EXPORT(uart_init);
 
 void rt_hw_console_output(const char *str)
 {   
 	rt_size_t i = 0, size = 0;
 	char a = '\r';
-
+	return;
 	size = rt_strlen(str);
 	for (i = 0; i < size; i++)
 	{
 		if (*(str + i) == '\n')
 		{
-			USART_SendData(USART1, a);
-			while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
+			USART_SendData(USART3, a);
+			while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET); 
 		}
-		USART_SendData(USART1, *(uint8_t *)(str + i));
-		while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
+		USART_SendData(USART3, *(uint8_t *)(str + i));
+		while(USART_GetFlagStatus(USART3, USART_FLAG_TXE) == RESET); 
 	}
 }
 
 char rt_hw_console_getchar(void)
 {
 	int8_t ch = -1;
-	if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
-		ch = USART_ReceiveData(USART1) & 0xff;
+	return 0;
+	if (USART_GetFlagStatus(USART3, USART_FLAG_RXNE) == SET)
+		ch = USART_ReceiveData(USART3) & 0xff;
 	return ch;
 }

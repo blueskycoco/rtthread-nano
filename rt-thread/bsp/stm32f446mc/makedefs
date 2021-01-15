@@ -84,7 +84,7 @@ ARMGCC_ROOT:=${shell dirname '${shell sh -c "which ${CC}"}'}/..
 #
 # Set the compiler CPU/FPU options.
 #
-CPU=-mcpu=cortex-m0
+CPU=-mcpu=cortex-m4
 
 #
 # The flags passed to the assembler.
@@ -142,7 +142,7 @@ OBJCOPY=${PREFIX}-objcopy
 # Tell the compiler to include debugging information if the DEBUG environment
 # variable is set.
 #
-#DEBUG = 1
+DEBUG = 1
 ifdef DEBUG
 CFLAGS+=-g -D DEBUG -Os
 else
