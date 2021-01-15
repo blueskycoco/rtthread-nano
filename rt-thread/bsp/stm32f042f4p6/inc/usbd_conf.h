@@ -39,7 +39,7 @@
 #define USB_MAX_STR_DESC_SIZ       64 
 #define USBD_SELF_POWERED               
 
-#define CUSTOMHID_SIZ_REPORT_DESC               28//163
+#define CUSTOMHID_SIZ_REPORT_DESC               38//163
 #define CUSTOMHID_SIZ_CONFIG_DESC               41
 
 #define HID_IN_EP                    0x81
