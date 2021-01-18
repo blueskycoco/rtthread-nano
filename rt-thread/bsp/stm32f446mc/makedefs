@@ -68,7 +68,7 @@ ifeq (${COMPILER}, gcc)
 #
 PREFIX:=${shell type arm-stellaris-eabi-gcc > /dev/null 2>&1 && \
          echo arm-stellaris-eabi || echo arm-none-eabi}
-
+PREFIX=/cygdrive/c/software/gcc-arm-none-eabi-9-2020-q2-update-win32/bin/arm-none-eabi
 #
 # The command for calling the compiler.
 #
@@ -149,7 +149,7 @@ else
 CFLAGS+=-Os
 endif
 
-#VERBOSE = 1 
+VERBOSE = 1 
 #
 # Add the tool specific CFLAGS.
 #

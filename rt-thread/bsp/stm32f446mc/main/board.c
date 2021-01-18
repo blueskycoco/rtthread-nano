@@ -158,13 +158,13 @@ static int uart_init(void)
 	return 0;
 }
 
-//INIT_BOARD_EXPORT(uart_init);
+INIT_BOARD_EXPORT(uart_init);
 
 void rt_hw_console_output(const char *str)
 {   
 	rt_size_t i = 0, size = 0;
 	char a = '\r';
-	return;
+
 	size = rt_strlen(str);
 	for (i = 0; i < size; i++)
 	{

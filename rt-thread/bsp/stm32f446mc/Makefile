@@ -77,6 +77,7 @@ ${COMPILER}:
 # Rules for building the rtthread example.
 #
 #init
+#${COMPILER}/rtthread.axf: ${COMPILER}/startup_gcc_446ze.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/startup_stm32f446xx.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/system_stm32f4xx.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/main.o
@@ -105,6 +106,27 @@ ${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_spi.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_tim.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_usart.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_wwdg.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cryp.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cryp_aes.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cryp_des.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cryp_tdes.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dcmi.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dfsdm.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dma2d.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dsi.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_flash_ramfunc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_fmc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_fmpi2c.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_hash.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_hash_md5.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_hash_sha1.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_lptim.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_ltdc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_qspi.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_rng.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_sai.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_sdio.o
+${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_spdifrx.o
 #rtthread
 ${COMPILER}/rtthread.axf: ${COMPILER}/clock.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/components.o
