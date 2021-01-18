@@ -136,7 +136,7 @@ static int uart_init(void)
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-	USART_InitStructure.USART_BaudRate = 2000000;
+	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -144,6 +144,7 @@ static int uart_init(void)
 		USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_Init(USART3, &USART_InitStructure);
+	USART_InitStructure.USART_BaudRate = 2000000;
 	USART_Init(USART6, &USART_InitStructure);
 
 	//uart_dma_config();

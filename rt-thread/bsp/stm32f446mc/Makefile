@@ -83,6 +83,8 @@ ${COMPILER}/rtthread.axf: ${COMPILER}/system_stm32f4xx.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/main.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/board.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/ymodem.o
+${COMPILER}/rtthread.axf: ${COMPILER}/md5.o
+${COMPILER}/rtthread.axf: ${COMPILER}/boot.o
 #${COMPILER}/rtthread.axf: ${COMPILER}/stm32_it.o
 #driver
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_gpio.o
