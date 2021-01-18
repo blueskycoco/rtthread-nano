@@ -24,7 +24,7 @@ extern uint32_t SystemCoreClock;
 uint8_t uart_tx_buf[64] = {0};
 uint8_t uart_rx_buf[64] = {0};
 #if defined(RT_USING_USER_MAIN) && defined(RT_USING_HEAP)
-#define RT_HEAP_SIZE 1024
+#define RT_HEAP_SIZE 10*1024
 static uint32_t rt_heap[RT_HEAP_SIZE];	// heap default size: 6K(1536 * 4)
 RT_WEAK void *rt_heap_begin_get(void)
 {

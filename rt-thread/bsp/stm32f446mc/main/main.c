@@ -13,6 +13,8 @@
 #include "md5.h"
 #include "ymodem.h"
 #include "boot.h"
+#include "utils.h"
+#include "mcu.h"
 
 extern uint8_t uart_rx_buf[64];
 extern uint8_t uart_tx_buf[64];
@@ -54,19 +56,18 @@ int main(void)
 	//rt_sem_init(&sem, "shrx", 0, 0);
 	led_init();
 
-	MD5Init(&md5);
-	MD5Update(&md5,(unsigned char *)0x08020000,138056);
-	MD5Final(&md5,decrypt);
-
-	for (i=0; i<16; i++)
-		rt_kprintf("%02x", decrypt[i]);
-	/* waiting to enter ymodem */
-
 	//rt_sem_take(&sem, RT_WAITING_FOREVER);
 	//uart_rx_set();
 	//_rym_do_recv(&ctx, RT_WAITING_FOREVER);
-    //rt_hw_interrupt_disable();
-	app_boot();
+    	//rt_hw_interrupt_disable();
+
+	if (warm_boot())
+		protocol_init();
+	
+	verify_and_jump();
+	
+	protocol_init();
+
 	while (1)
 	{
 		if (flag == 1) {

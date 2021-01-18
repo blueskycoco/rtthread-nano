@@ -12,6 +12,7 @@
 
 #include <rthw.h>
 #include "ymodem.h"
+#include "flash_if.h"
 #include <stdint.h>
 #include <stdlib.h>
 #ifdef YMODEM_USING_CRC_TABLE 
@@ -375,6 +376,7 @@ rt_err_t _rym_do_recv(
 	rt_err_t err;
 
 	ctx->stage = RYM_STAGE_NONE;
+	FLASH_If_Init();
 
 	err = _rym_do_handshake(ctx, handshake_timeout);
 	if (err != RT_EOK)

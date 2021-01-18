@@ -37,6 +37,8 @@ include ${ROOT}/makedefs
 #
 IPATH = ./
 IPATH = ./main
+IPATH += ./main/driver
+IPATH += ./main/utils
 IPATH += ./inc
 IPATH += ./Libraries/CMSIS/Include
 IPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Include
@@ -46,6 +48,8 @@ IPATH += ../../components/finsh
 
 VPATH = .
 VPATH += ./main
+VPATH += ./main/driver
+VPATH += ./main/utils
 VPATH += ./Libraries/STM32F4xx_StdPeriph_Driver/src
 VPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates
 VPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7
@@ -85,6 +89,11 @@ ${COMPILER}/rtthread.axf: ${COMPILER}/board.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/ymodem.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/md5.o
 ${COMPILER}/rtthread.axf: ${COMPILER}/boot.o
+${COMPILER}/rtthread.axf: ${COMPILER}/mem_list.o
+${COMPILER}/rtthread.axf: ${COMPILER}/mcu.o
+${COMPILER}/rtthread.axf: ${COMPILER}/rc4.o
+${COMPILER}/rtthread.axf: ${COMPILER}/crc.o
+${COMPILER}/rtthread.axf: ${COMPILER}/flash_if.o
 #${COMPILER}/rtthread.axf: ${COMPILER}/stm32_it.o
 #driver
 ${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_gpio.o
@@ -152,7 +161,7 @@ ${COMPILER}/rtthread.axf: rtthread.ld
 SCATTERgcc_rtthread=rtthread.ld
 ENTRY_rtthread=Reset_Handler
 #CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F10X_HD -DMASTER
-CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F446xx
+CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F446xx -DFW_VERSION=\"${VER}\"
 #
 # Include the automatically generated dependency files.
 #
