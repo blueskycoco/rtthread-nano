@@ -14,9 +14,14 @@
 #include <rtthread.h>
 #include <system_stm32f4xx.h>
 #include <stm32f4xx.h>
+#include "mcu.h"
+#include "mcu_cmd.h"
+#include "utils.h"
+#include "mem_list.h"
+
 extern void SystemCoreClockUpdate(void);
-#define USART2_RDR_Address    0x40004424
-#define USART2_TDR_Address    0x40004428
+#define USART6_RDR_Address    0x40011404
+#define USART6_TDR_Address    0x40011404
 // Holds the system core clock, which is the system clock 
 // frequency supplied to the SysTick timer and the processor 
 // core clock.
@@ -68,12 +73,93 @@ void SysTick_Handler(void)
 	/* leave interrupt */
 	rt_interrupt_leave();
 }
-#if 0
+
+void USART2_IRQHandler(void)
+{
+	rt_interrupt_enter();
+
+	if (USART_GetFlagStatus(USART6, USART_FLAG_FE) != RESET) 
+		USART_ClearFlag(USART6, USART_FLAG_FE);
+
+	if(USART_GetFlagStatus(USART6, USART_FLAG_PE) != RESET)         
+		USART_ClearFlag(USART6, USART_FLAG_PE);  			  
+
+	if(USART_GetFlagStatus(USART6, USART_FLAG_ORE) != RESET)
+		USART_ClearFlag(USART6, USART_FLAG_ORE);
+
+	rt_interrupt_leave();
+}
+
+void DMA2_Stream6_IRQHandler(void)
+{
+	rt_interrupt_enter();
+	if (DMA_GetFlagStatus(DMA2_Stream6, DMA_FLAG_TCIF6)) {
+		/* data sending to ov580 finish */
+  		DMA_ClearFlag(DMA2_Stream6, DMA_FLAG_TCIF6);
+  		DMA_Cmd(DMA2_Stream6, DISABLE);
+		notify_event(EVENT_ST2OV);
+	}
+	rt_interrupt_leave();
+}
+
+void DMA2_Stream1_IRQHandler(void)
+{
+	uint32_t tmp;
+	rt_interrupt_enter();
+	tmp = DMA2->HISR;
+	tmp = DMA2->LISR;
+	if (DMA_GetFlagStatus(DMA2_Stream1, DMA_FLAG_TCIF1)){
+  		DMA_ClearFlag(DMA2_Stream1, DMA_FLAG_TCIF1);
+		DMA_Cmd(DMA2_Stream1, DISABLE);
+		/* data from ov580 finish */
+		insert_mem(TYPE_H2D, uart_rx_buf, 64);
+		notify_event(EVENT_OV2ST);
+		uart_rx_set();
+	}
+	rt_interrupt_leave();
+}
+
+void uart_rsp_out(uint8_t *cmd, uint16_t len)
+{
+	rt_memcpy(uart_tx_buf, cmd, 64);
+	uart_tx_set();
+}
+
 static void uart_dma_config()
 {
 	DMA_InitTypeDef  DMA_InitStructure;
 	NVIC_InitTypeDef NVIC_InitStructure;
 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
+	DMA_DeInit(DMA2_Stream1);
+	DMA_DeInit(DMA2_Stream6);
+
+	while (DMA_GetCmdStatus(DMA2_Stream1) != DISABLE);
+	while (DMA_GetCmdStatus(DMA2_Stream6) != DISABLE);
+
+	DMA_InitStructure.DMA_Channel = DMA_Channel_5;  
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)USART6_RDR_Address;
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)uart_rx_buf;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+	DMA_InitStructure.DMA_BufferSize = (uint32_t)64;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;         
+	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
+	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+	DMA_Init(DMA2_Stream1, &DMA_InitStructure);
+	
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)USART6_TDR_Address;
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)uart_tx_buf;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+	DMA_Init(DMA2_Stream6, &DMA_InitStructure);
+
+#if 0
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 	DMA_InitStructure.DMA_BufferSize = 64;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -85,34 +171,35 @@ static void uart_dma_config()
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)uart_tx_buf;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 	DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
-	DMA_InitStructure.DMA_PeripheralBaseAddr = USART2_TDR_Address;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = USART6_TDR_Address;
 	DMA_Init(DMA1_Channel4, &DMA_InitStructure);
 
 	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)uart_rx_buf;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
-	DMA_InitStructure.DMA_PeripheralBaseAddr = USART2_RDR_Address;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = USART6_RDR_Address;
 	DMA_Init(DMA1_Channel5, &DMA_InitStructure);
-
-	USART_DMACmd(USART2, USART_DMAReq_Rx|USART_DMAReq_Tx, ENABLE);
-	
-	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel4_5_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-	
-	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	DMA_Cmd(DMA1_Channel5, ENABLE);
-	DMA_Cmd(DMA1_Channel4, DISABLE);
-	
-	DMA_ITConfig(DMA1_Channel4, DMA_IT_TC, ENABLE);
-	DMA_ITConfig(DMA1_Channel5, DMA_IT_TC, ENABLE);
-}
 #endif
+	USART_DMACmd(USART6, USART_DMAReq_Rx|USART_DMAReq_Tx, ENABLE);
+	
+	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream6_IRQn;
+	NVIC_Init(&NVIC_InitStructure);
+	
+	NVIC_InitStructure.NVIC_IRQChannel = USART6_IRQn;
+	NVIC_Init(&NVIC_InitStructure);
+
+	DMA_Cmd(DMA2_Stream1, ENABLE);
+	DMA_Cmd(DMA2_Stream6, DISABLE);
+	
+	DMA_ITConfig(DMA2_Stream6, DMA_SxCR_TCIE, ENABLE);
+	DMA_ITConfig(DMA2_Stream1, DMA_SxCR_TCIE, ENABLE);
+}
+
 static int uart_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -144,10 +231,11 @@ static int uart_init(void)
 		USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_Init(USART3, &USART_InitStructure);
+	
 	USART_InitStructure.USART_BaudRate = 2000000;
 	USART_Init(USART6, &USART_InitStructure);
 
-	//uart_dma_config();
+	uart_dma_config();
 
 	USART_ITConfig(USART6, USART_IT_ORE, ENABLE);	
 	USART_ITConfig(USART6, USART_IT_ERR, ENABLE);	

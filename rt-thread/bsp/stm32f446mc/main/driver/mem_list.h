@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#include <stdint.h>
 #define TYPE_D2H	0x01
 #define TYPE_H2D	0x00
 void rt_memlist_init();

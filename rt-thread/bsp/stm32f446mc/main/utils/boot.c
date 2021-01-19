@@ -33,6 +33,8 @@ void verify_and_jump()
 	rt_memcpy((void *)fw_md5,
 			(const void *)(__IO uint8_t *)APP_MD5_ADDR, 16);
 
+	rt_kprintf("fw len: %u %x\r\n", fw_len, fw_len);
+
 	if (fw_len > 256*1024)
 		return;
 

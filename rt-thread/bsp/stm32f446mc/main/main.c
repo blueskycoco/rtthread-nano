@@ -16,8 +16,6 @@
 #include "utils.h"
 #include "mcu.h"
 
-extern uint8_t uart_rx_buf[64];
-extern uint8_t uart_tx_buf[64];
 struct rym_ctx ctx;
 struct rt_semaphore sem;
 void led_init()
@@ -33,26 +31,9 @@ void led_init()
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
-#if 0
-void uart_tx_set()
-{
-	DMA_Cmd(DMA1_Channel4, DISABLE);
-	DMA1_Channel4->CNDTR = 64;
-	DMA_Cmd(DMA1_Channel4, ENABLE);
-}
-void uart_rx_set()
-{
-	DMA_Cmd(DMA1_Channel5, DISABLE);
-	DMA1_Channel5->CNDTR = 64;
-	DMA_Cmd(DMA1_Channel5, ENABLE);
-}
-#endif
 int main(void)
 {
 	uint8_t flag = 0;
-	int i;
-	MD5_CTX md5; 
-	unsigned char decrypt[16] = {0};    
 	//rt_sem_init(&sem, "shrx", 0, 0);
 	led_init();
 

@@ -18,6 +18,9 @@ static uint16_t hw_minor_version = 0x0001;
 static uint16_t hw_patch_version = 0x0000;
 static uint32_t hw_build_date = 2020082514;
 static uint8_t heart_ts[2][8];
+ALIGN(8)
+static rt_uint8_t mcu_stack[2048];
+struct rt_thread mcu_thread;
 
 static void parse_host_cmd(uint8_t *cmd, uint16_t len, uint8_t *msg)
 {
@@ -217,7 +220,7 @@ static void mcu_msg_handler(uint8_t *msg)
 	   err h/d msg_id  payload_len  reserve  payload
 	   */
 
-	rt_bool_t status = RT_TRUE;    
+	//rt_bool_t status = RT_TRUE;    
 	uint8_t rsp[64] = {0};
 	uint16_t rsp_msg_id = 0;
 	uint16_t out_payload_len = 0;
@@ -226,8 +229,8 @@ static void mcu_msg_handler(uint8_t *msg)
 	uint16_t msg_id = (msg[2] << 8) | msg[3];
 	uint16_t cmd_len = (msg[4] << 8) | msg[5];
 	uint8_t *cmd = (uint8_t *)(msg+10);
-	uint32_t reserve = (msg[6] << 24) | (msg[7] << 16) |
-		(msg[8] << 8) | msg[9];
+	//uint32_t reserve = (msg[6] << 24) | (msg[7] << 16) |
+	//	(msg[8] << 8) | msg[9];
 
 	if (msg_id == HOST_CMD_GET || msg_id == HOST_CMD_SET)
 		cmd_id = (cmd[2] << 8) | cmd[1];
@@ -285,7 +288,7 @@ static void mcu_msg_handler(uint8_t *msg)
 	rsp[63] = ((crc_ofs+4) >> 0) & 0xff;
 	//rt_kprintf("%d crc %x", crc_ofs, crc);
 	if (!insert_mem(TYPE_D2H, rsp, 64))
-		LOG_W("lost d2h packet\r\n");
+		rt_kprintf("lost d2h packet\r\n");
 	notify_event(EVENT_ST2OV);
 }
 void notify_event(uint32_t _event)
@@ -297,9 +300,7 @@ void mcu_msg_send(uint8_t *event)
 {
 	mcu_msg_handler(event);
 }
-static void dump_data(uint8_t *data, uint16_t len)
-{
-}
+
 static void mcu_cmd_handler(void *param)
 {
 	uint8_t msg[64] = {0};
@@ -308,13 +309,16 @@ static void mcu_cmd_handler(void *param)
 	uint32_t status;
 	uint32_t state = EVENT_OV2ST | EVENT_ST2OV;	
 	
-	normal_timer_init();	
+	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
+	//normal_timer_init();	
 	while (1)
 	{
+	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
 		if (rt_event_recv(&event_d2h, state,
 					RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
 					RT_WAITING_FOREVER,
 					(rt_uint32_t *)&status) == RT_EOK)
+	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
 		{
 			if (status & EVENT_OV2ST) {
 				//rt_kprintf("%ld event 0x%x", read_ts(), status);
@@ -341,8 +345,18 @@ static void mcu_cmd_handler(void *param)
 
 void protocol_init()
 {
+	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
+	rt_memlist_init();
+	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
 	rt_event_init(&event_d2h, "bridge", RT_IPC_FLAG_FIFO);
-	rt_thread_t tid = rt_thread_create("proto", mcu_cmd_handler, RT_NULL,
-			2048, 28, 20);
-	rt_thread_startup(tid);
+	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
+	//rt_thread_t tid = rt_thread_create("proto", mcu_cmd_handler, RT_NULL,
+	//		2048, 28, 20);
+	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
+	//rt_thread_startup(tid);
+	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
+    
+    	rt_thread_init(&mcu_thread, "mcu", mcu_cmd_handler, RT_NULL,
+                            mcu_stack, sizeof(mcu_stack), RT_THREAD_PRIORITY_MAX / 3, 20);
+	rt_thread_startup(&mcu_thread);
 }

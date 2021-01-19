@@ -1,6 +1,6 @@
 #******************************************************************************
 #
-# Makefile - Rules for building the rtthread example.
+# Makefile - Rules for building the ${VER} example.
 #
 # Copyright (c) 2013-2014 Texas Instruments Incorporated.  All rights reserved.
 # Software License Agreement
@@ -58,10 +58,10 @@ VPATH += ../../src
 VPATH += ../../components/finsh
 VPATH += ../../libcpu/arm/cortex-m4
 #
-# The default rule, which causes the rtthread example to be built.
+# The default rule, which causes the ${VER} example to be built.
 #
 all: ${COMPILER}
-all: ${COMPILER}/rtthread.axf
+all: ${COMPILER}/${VER}.axf
 
 #
 # The rule to clean out all the build products.
@@ -70,7 +70,7 @@ clean:
 	@rm -rf ${COMPILER} ${wildcard *~}
 
 install:
-	jlink.exe burn.txt
+	openocd -f openocd.cfg -c "flash_image ${VER}.bin"
 #
 # The rule to create the target directory.
 #
@@ -78,88 +78,90 @@ ${COMPILER}:
 	@mkdir -p ${COMPILER}
 
 #
-# Rules for building the rtthread example.
+# Rules for building the ${VER} example.
 #
 #init
-#${COMPILER}/rtthread.axf: ${COMPILER}/startup_gcc_446ze.o
-${COMPILER}/rtthread.axf: ${COMPILER}/startup_stm32f446xx.o
-${COMPILER}/rtthread.axf: ${COMPILER}/system_stm32f4xx.o
-${COMPILER}/rtthread.axf: ${COMPILER}/main.o
-${COMPILER}/rtthread.axf: ${COMPILER}/board.o
-${COMPILER}/rtthread.axf: ${COMPILER}/ymodem.o
-${COMPILER}/rtthread.axf: ${COMPILER}/md5.o
-${COMPILER}/rtthread.axf: ${COMPILER}/boot.o
-${COMPILER}/rtthread.axf: ${COMPILER}/mem_list.o
-${COMPILER}/rtthread.axf: ${COMPILER}/mcu.o
-${COMPILER}/rtthread.axf: ${COMPILER}/rc4.o
-${COMPILER}/rtthread.axf: ${COMPILER}/crc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/flash_if.o
-#${COMPILER}/rtthread.axf: ${COMPILER}/stm32_it.o
+#${COMPILER}/${VER}.axf: ${COMPILER}/startup_gcc_446ze.o
+${COMPILER}/${VER}.axf: ${COMPILER}/startup_stm32f446xx.o
+${COMPILER}/${VER}.axf: ${COMPILER}/system_stm32f4xx.o
+${COMPILER}/${VER}.axf: ${COMPILER}/main.o
+${COMPILER}/${VER}.axf: ${COMPILER}/board.o
+${COMPILER}/${VER}.axf: ${COMPILER}/ymodem.o
+${COMPILER}/${VER}.axf: ${COMPILER}/md5.o
+${COMPILER}/${VER}.axf: ${COMPILER}/boot.o
+${COMPILER}/${VER}.axf: ${COMPILER}/mem_list.o
+${COMPILER}/${VER}.axf: ${COMPILER}/mcu.o
+${COMPILER}/${VER}.axf: ${COMPILER}/rc4.o
+${COMPILER}/${VER}.axf: ${COMPILER}/crc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/utils.o
+${COMPILER}/${VER}.axf: ${COMPILER}/flash_if.o
+#${COMPILER}/${VER}.axf: ${COMPILER}/stm32_it.o
 #driver
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_gpio.o
-${COMPILER}/rtthread.axf: ${COMPILER}/misc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_adc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_can.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cec.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_crc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dac.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dbgmcu.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dma.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_exti.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_flash.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_i2c.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_iwdg.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_pwr.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_rcc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_rtc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_syscfg.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_spi.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_tim.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_usart.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_wwdg.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cryp.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cryp_aes.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cryp_des.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_cryp_tdes.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dcmi.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dfsdm.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dma2d.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_dsi.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_flash_ramfunc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_fmc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_fmpi2c.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_hash.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_hash_md5.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_hash_sha1.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_lptim.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_ltdc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_qspi.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_rng.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_sai.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_sdio.o
-${COMPILER}/rtthread.axf: ${COMPILER}/stm32f4xx_spdifrx.o
-#rtthread
-${COMPILER}/rtthread.axf: ${COMPILER}/clock.o
-${COMPILER}/rtthread.axf: ${COMPILER}/components.o
-${COMPILER}/rtthread.axf: ${COMPILER}/context_gcc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/cpuport.o
-${COMPILER}/rtthread.axf: ${COMPILER}/idle.o
-${COMPILER}/rtthread.axf: ${COMPILER}/ipc.o
-${COMPILER}/rtthread.axf: ${COMPILER}/irq.o
-${COMPILER}/rtthread.axf: ${COMPILER}/kservice.o
-${COMPILER}/rtthread.axf: ${COMPILER}/mem.o
-${COMPILER}/rtthread.axf: ${COMPILER}/memheap.o
-${COMPILER}/rtthread.axf: ${COMPILER}/mempool.o
-${COMPILER}/rtthread.axf: ${COMPILER}/object.o
-${COMPILER}/rtthread.axf: ${COMPILER}/scheduler.o
-${COMPILER}/rtthread.axf: ${COMPILER}/thread.o
-${COMPILER}/rtthread.axf: ${COMPILER}/timer.o
-${COMPILER}/rtthread.axf: ${COMPILER}/cmd.o
-${COMPILER}/rtthread.axf: ${COMPILER}/msh.o
-${COMPILER}/rtthread.axf: ${COMPILER}/shell.o
-${COMPILER}/rtthread.axf: rtthread.ld
-SCATTERgcc_rtthread=rtthread.ld
-ENTRY_rtthread=Reset_Handler
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_gpio.o
+${COMPILER}/${VER}.axf: ${COMPILER}/misc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_adc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_can.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cec.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_crc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dac.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dbgmcu.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dma.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_exti.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_flash.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_i2c.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_iwdg.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_pwr.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_rcc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_rtc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_syscfg.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_spi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_tim.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_usart.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_wwdg.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cryp.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cryp_aes.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cryp_des.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cryp_tdes.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dcmi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dfsdm.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dma2d.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dsi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_flash_ramfunc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_fmc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_fmpi2c.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hash.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hash_md5.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hash_sha1.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_lptim.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ltdc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_qspi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_rng.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_sai.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_sdio.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_spdifrx.o
+#${VER}
+${COMPILER}/${VER}.axf: ${COMPILER}/clock.o
+${COMPILER}/${VER}.axf: ${COMPILER}/components.o
+${COMPILER}/${VER}.axf: ${COMPILER}/context_gcc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/cpuport.o
+${COMPILER}/${VER}.axf: ${COMPILER}/mem.o
+${COMPILER}/${VER}.axf: ${COMPILER}/idle.o
+${COMPILER}/${VER}.axf: ${COMPILER}/ipc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/irq.o
+${COMPILER}/${VER}.axf: ${COMPILER}/kservice.o
+${COMPILER}/${VER}.axf: ${COMPILER}/mem.o
+${COMPILER}/${VER}.axf: ${COMPILER}/memheap.o
+${COMPILER}/${VER}.axf: ${COMPILER}/mempool.o
+${COMPILER}/${VER}.axf: ${COMPILER}/object.o
+${COMPILER}/${VER}.axf: ${COMPILER}/scheduler.o
+${COMPILER}/${VER}.axf: ${COMPILER}/thread.o
+${COMPILER}/${VER}.axf: ${COMPILER}/timer.o
+${COMPILER}/${VER}.axf: ${COMPILER}/cmd.o
+${COMPILER}/${VER}.axf: ${COMPILER}/msh.o
+${COMPILER}/${VER}.axf: ${COMPILER}/shell.o
+${COMPILER}/${VER}.axf: rtthread.ld
+SCATTERgcc_${VER}=rtthread.ld
+ENTRY_${VER}=Reset_Handler
 #CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F10X_HD -DMASTER
 CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F446xx -DFW_VERSION=\"${VER}\"
 #

@@ -36,13 +36,15 @@ static void IntDefaultHandler(void);
 static void SVC_Handler(void);
 extern void EXTI4_15_IRQHandler(void);
 extern void USART1_IRQHandler(void);
-extern void USART2_IRQHandler(void);
+extern void USART6_IRQHandler(void);
 extern void SysTick_Handler(void);
 extern void PendSV_Handler(void);
 extern void HardFault_Handler(void);
 extern void USB_IRQHandler(void);
 extern void EXTI0_1_IRQHandler(void);
 extern void DMA1_Channel4_5_IRQHandler(void);
+extern void DMA2_Stream6_IRQHandler(void);
+extern void DMA2_Stream1_IRQHandler(void);
 //*****************************************************************************
 //
 // External declaration for the interrupt handler used by the application.
@@ -177,7 +179,7 @@ void (* const g_pfnVectors[])(void) =
   IntDefaultHandler, //g    TIM6_DAC_IRQHandler               /* TIM6 and DAC1&2 underrun errors */                   
   IntDefaultHandler, //g    TIM7_IRQHandler                   /* TIM7                         */
   IntDefaultHandler, //g    DMA2_Stream0_IRQHandler           /* DMA2 Stream 0                */                   
-  IntDefaultHandler, //g    DMA2_Stream1_IRQHandler           /* DMA2 Stream 1                */                   
+  DMA2_Stream1_IRQHandler, //g    DMA2_Stream1_IRQHandler           /* DMA2 Stream 1                */                   
   IntDefaultHandler, //g    DMA2_Stream2_IRQHandler           /* DMA2 Stream 2                */                   
   IntDefaultHandler, //g    DMA2_Stream3_IRQHandler           /* DMA2 Stream 3                */                   
   IntDefaultHandler, //g    DMA2_Stream4_IRQHandler           /* DMA2 Stream 4                */                   
@@ -189,9 +191,9 @@ void (* const g_pfnVectors[])(void) =
   IntDefaultHandler, //g    CAN2_SCE_IRQHandler               /* CAN2 SCE                     */                          
   IntDefaultHandler, //g    OTG_FS_IRQHandler                 /* USB OTG FS                   */                   
   IntDefaultHandler, //g    DMA2_Stream5_IRQHandler           /* DMA2 Stream 5                */                   
-  IntDefaultHandler, //g    DMA2_Stream6_IRQHandler           /* DMA2 Stream 6                */                   
+  DMA2_Stream6_IRQHandler, //g    DMA2_Stream6_IRQHandler           /* DMA2 Stream 6                */                   
   IntDefaultHandler, //g    DMA2_Stream7_IRQHandler           /* DMA2 Stream 7                */                   
-  IntDefaultHandler, //g    USART6_IRQHandler                 /* USART6                       */                    
+  USART6_IRQHandler, //g    USART6_IRQHandler                 /* USART6                       */                    
   IntDefaultHandler, //g    I2C3_EV_IRQHandler                /* I2C3 event                   */                          
   IntDefaultHandler, //g    I2C3_ER_IRQHandler                /* I2C3 error                   */                          
   IntDefaultHandler, //g    OTG_HS_EP1_OUT_IRQHandler         /* USB OTG HS End Point 1 Out   */                   
