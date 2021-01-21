@@ -212,6 +212,7 @@ static uint16_t fill_payload(uint16_t msg_id, uint8_t *cmd, uint16_t cmd_len,
 			rsp[6] = MCU_ERR_SUCCESS;
 			payload_len = 1;
 			ota_start();
+			break;
 		default:
 			break;
 

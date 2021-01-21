@@ -109,15 +109,13 @@ void DMA2_Stream6_IRQHandler(void)
 
 void DMA2_Stream1_IRQHandler(void)
 {
-	uint32_t tmp;
 	rt_interrupt_enter();
-	tmp = DMA2->HISR;
-	tmp = DMA2->LISR;
 	if (DMA_GetFlagStatus(DMA2_Stream1, DMA_FLAG_TCIF1)){
   		DMA_ClearFlag(DMA2_Stream1, DMA_FLAG_TCIF1);
 		DMA_Cmd(DMA2_Stream1, DISABLE);
 		/* data from ov580 finish */
 		if (ota_mode) {
+			insert_mem(TYPE_H2D, uart_rx_buf, 64);
     			rt_sem_release(&ota_sem);
 		} else {
 			insert_mem(TYPE_H2D, uart_rx_buf, 64);

@@ -87,27 +87,29 @@ uint32_t FLASH_If_Erase(uint32_t StartSector, uint32_t EndSector)
   *         1: Error occurred while writing data in Flash memory
   *         2: Written Data in flash memory is different from expected one
   */
-uint32_t FLASH_If_Write(__IO uint32_t* FlashAddress, uint32_t* Data ,uint32_t DataLength)
+uint32_t FLASH_If_Write(uint32_t FlashAddress, uint32_t* Data ,uint32_t DataLength)
 {
   uint32_t i = 0;
-
-  for (i = 0; (i < DataLength) && (*FlashAddress <= (USER_FLASH_END_ADDRESS-4)); i++)
+	uint32_t addr = FlashAddress;
+  for (i = 0; (i < DataLength) && (addr <= (USER_FLASH_END_ADDRESS-4)); i++)
   {
-    /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
+	/* Device voltage range supposed to be [2.7V to 3.6V], the operation will
        be done by word */ 
-    if (FLASH_ProgramWord(*FlashAddress, *(uint32_t*)(Data+i)) == FLASH_COMPLETE)
+    if (FLASH_ProgramWord(addr, *(uint32_t*)(Data+i)) == FLASH_COMPLETE)
     {
      /* Check the written value */
-      if (*(uint32_t*)*FlashAddress != *(uint32_t*)(Data+i))
+      if (*(__IO uint32_t*)addr != *(uint32_t*)(Data+i))
       {
-        /* Flash content doesn't match SRAM content */
+  	rt_kprintf("%d %x <> %x\r\n", i, *(uint32_t *)addr, *(uint32_t *)(Data+i));
+  	     /* Flash content doesn't match SRAM content */
         return(2);
       }
       /* Increment FLASH destination address */
-      *FlashAddress += 4;
+      addr += 4;
     }
     else
     {
+    	    rt_kprintf("FLASH_ProgramWord failed\r\n");
       /* Error occurred while writing data in Flash memory */
       return (1);
     }

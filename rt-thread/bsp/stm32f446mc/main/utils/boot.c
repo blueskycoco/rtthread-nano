@@ -12,6 +12,7 @@ jump_app jump;
 
 static void app_boot()
 {
+        rt_hw_interrupt_disable();
 	if (((*(__IO uint32_t*)(APP_ADDRESS + 4)) & 0xFF000000 ) == 0x08000000)
 	{
 		uint32_t JumpAddress = *(__IO uint32_t*) (APP_ADDRESS + 4);
@@ -23,7 +24,8 @@ static void app_boot()
 
 void verify_and_jump()
 {
-	uint32_t fw_len = *(__IO uint32_t *)(APP_LEN_ADDR);
+	uint8_t *ptr = (uint8_t *)APP_LEN_ADDR;
+	uint32_t fw_len = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | (ptr[3]);
 	uint8_t fw_md5[16];
 	int i;
 	uint8_t boot = 1;
@@ -37,9 +39,9 @@ void verify_and_jump()
 
 	if (fw_len > 256*1024)
 		return;
-
+	ptr = (uint8_t *)APP_ADDRESS;
 	MD5Init(&md5);
-	MD5Update(&md5, (uint8_t *)APP_ADDRESS, fw_len);
+	MD5Update(&md5, ptr, fw_len);
 	MD5Final(&md5, decrypt);
 
 	for (i=0; i<16; i++) {

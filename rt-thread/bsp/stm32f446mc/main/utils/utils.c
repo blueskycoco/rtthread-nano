@@ -60,6 +60,10 @@ void dump_mcu_cmd(uint16_t msg_id, uint16_t cmd_id,
 		strcpy(tmp, "MSG_ID_SW_VER: ");
 		break;
 		
+		case MSG_ID_OTA:
+		strcpy(tmp, "MSG_ID_OTA: ");
+		break;
+		
 		case HEART_CMD:
 //		strcat(tmp,"HEART_CMD: \r\n");
 		break;
