@@ -19,6 +19,8 @@
 #include "utils.h"
 #include "mem_list.h"
 
+extern struct rt_semaphore ota_sem;
+extern rt_bool_t ota_mode;
 extern void SystemCoreClockUpdate(void);
 #define USART6_RDR_Address    0x40011404
 #define USART6_TDR_Address    0x40011404
@@ -97,7 +99,10 @@ void DMA2_Stream6_IRQHandler(void)
 		/* data sending to ov580 finish */
   		DMA_ClearFlag(DMA2_Stream6, DMA_FLAG_TCIF6);
   		DMA_Cmd(DMA2_Stream6, DISABLE);
-		notify_event(EVENT_ST2OV);
+		if (ota_mode)
+    			rt_sem_release(&ota_sem);
+		else
+			notify_event(EVENT_ST2OV);
 	}
 	rt_interrupt_leave();
 }
@@ -112,8 +117,12 @@ void DMA2_Stream1_IRQHandler(void)
   		DMA_ClearFlag(DMA2_Stream1, DMA_FLAG_TCIF1);
 		DMA_Cmd(DMA2_Stream1, DISABLE);
 		/* data from ov580 finish */
-		insert_mem(TYPE_H2D, uart_rx_buf, 64);
-		notify_event(EVENT_OV2ST);
+		if (ota_mode) {
+    			rt_sem_release(&ota_sem);
+		} else {
+			insert_mem(TYPE_H2D, uart_rx_buf, 64);
+			notify_event(EVENT_OV2ST);
+		}
 		uart_rx_set();
 	}
 	rt_interrupt_leave();
@@ -159,27 +168,6 @@ static void uart_dma_config()
 	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
 	DMA_Init(DMA2_Stream6, &DMA_InitStructure);
 
-#if 0
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
-	DMA_InitStructure.DMA_BufferSize = 64;
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)uart_tx_buf;
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-	DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
-	DMA_InitStructure.DMA_PeripheralBaseAddr = USART6_TDR_Address;
-	DMA_Init(DMA1_Channel4, &DMA_InitStructure);
-
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)uart_rx_buf;
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
-	DMA_InitStructure.DMA_PeripheralBaseAddr = USART6_RDR_Address;
-	DMA_Init(DMA1_Channel5, &DMA_InitStructure);
-#endif
 	USART_DMACmd(USART6, USART_DMAReq_Rx|USART_DMAReq_Tx, ENABLE);
 	
 	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream1_IRQn;

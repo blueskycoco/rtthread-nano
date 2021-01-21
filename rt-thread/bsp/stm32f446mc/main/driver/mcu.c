@@ -7,7 +7,11 @@
 #include "crc.h"
 #include "utils.h"
 #include "mem_list.h"
+#include "ymodem.h"
 
+struct rym_ctx ctx;
+struct rt_semaphore ota_sem;
+rt_bool_t ota_mode = RT_FALSE;
 static struct rt_event event_d2h;
 static uint16_t sw_major_version = 0x0000;
 static uint16_t sw_minor_version = 0x0001;
@@ -35,8 +39,8 @@ static void parse_host_cmd(uint8_t *cmd, uint16_t len, uint8_t *msg)
 	 * STX  TS   MSGID  RESERVED     LEN    PAYLOAD  CRC
 	 */
 
-	if (cmd[0] != HOST_CMD_STX) {
-		rt_kprintf("invalid cmd %x\r\n", cmd[0]);
+	if (cmd[1] != HOST_CMD_STX) {
+		rt_kprintf("invalid cmd %x\r\n", cmd[1]);
 		msg[0] = MCU_ERR_UNSUPPORT;
 		msg[1] = HOST_CMD;
 		goto FAIL;
@@ -54,9 +58,9 @@ static void parse_host_cmd(uint8_t *cmd, uint16_t len, uint8_t *msg)
 		(cmd[_len-3] << 8) |
 		(cmd[_len-2] << 16) |
 		(cmd[_len-1] << 24);
-	if (crc != crc32((uint8_t *)cmd, _len-4)) {
+	if (crc != crc32((uint8_t *)cmd+1, _len-5)) {
 		rt_kprintf("invalid crc h %x != c %x\r\n", crc,
-				crc32((uint8_t *)cmd, _len-4));
+				crc32((uint8_t *)cmd+1, _len-5));
 		msg[0] = MCU_ERR_CRC;
 		msg[1] = HOST_CMD;
 		goto FAIL;
@@ -67,30 +71,30 @@ static void parse_host_cmd(uint8_t *cmd, uint16_t len, uint8_t *msg)
 	   err h/d msg_id  payload_len  reserve  payload
 	   */
 
-	msg_id = (cmd[CMD_MSGID_1] << 8) | cmd[CMD_MSGID_0];
+	msg_id = (cmd[CMD_MSGID_1+1] << 8) | cmd[CMD_MSGID_0+1];
 	if (msg_id == HEART_CMD)
 		read_ts_64(heart_ts[1]);
 
-	set_rc4_key(cmd[7]%10, msg_id, cmd+CMD_TS_OFS);
-	rc4(cmd+CMD_RESERVE_OFS,
-			cmd+CMD_RESERVE_OFS, _len - 4 - 1 - 8 - 2);
+	set_rc4_key(cmd[8]%10, msg_id, cmd+CMD_TS_OFS+1);
+	rc4(cmd+CMD_RESERVE_OFS+1,
+			cmd+CMD_RESERVE_OFS+1, _len - 4 - 1 - 8 - 2 - 1);
 
 	if (msg_id == HEART_CMD) {
-		rt_memcpy(heart_ts[0], cmd+18, 8);
+		rt_memcpy(heart_ts[0], cmd+19, 8);
 	}
 
 	msg[0] = MCU_ERR_SUCCESS;
 	msg[1] = HOST_CMD;
-	msg[2] = cmd[CMD_MSGID_1];
-	msg[3] = cmd[CMD_MSGID_0];
-	msg[4] = cmd[CMD_PAYLOAD_LEN_1];
-	msg[5] = cmd[CMD_PAYLOAD_LEN_0];
-	rt_memcpy(msg+6, cmd+CMD_RESERVE_OFS, 4);
+	msg[2] = cmd[CMD_MSGID_1+1];
+	msg[3] = cmd[CMD_MSGID_0+1];
+	msg[4] = cmd[CMD_PAYLOAD_LEN_1+1];
+	msg[5] = cmd[CMD_PAYLOAD_LEN_0+1];
+	rt_memcpy(msg+6, cmd+CMD_RESERVE_OFS+1, 4);
 	payload_len = (msg[4] << 8) | msg[5];
 
 
 	if (payload_len <= (64 - 10)) {
-		rt_memcpy(msg+10, cmd+CMD_PAYLOAD_OFS, payload_len);
+		rt_memcpy(msg+10, cmd+CMD_PAYLOAD_OFS+1, payload_len);
 	} else {
 		msg[0] = MCU_ERR_NREAL;
 		msg[1] = HOST_CMD;
@@ -113,6 +117,7 @@ static uint16_t get_rsp_msg_id(uint16_t msg_id)
 	}
 	return 0;
 }
+
 static void get_sw_ver()
 {
 	char *p = (char *)FW_VERSION;
@@ -203,6 +208,10 @@ static uint16_t fill_payload(uint16_t msg_id, uint8_t *cmd, uint16_t cmd_len,
 			}
 			payload_len = 11;
 			break;
+		case MSG_ID_OTA:
+			rsp[6] = MCU_ERR_SUCCESS;
+			payload_len = 1;
+			ota_start();
 		default:
 			break;
 
@@ -241,11 +250,12 @@ static void mcu_msg_handler(uint8_t *msg)
 		rt_kprintf("Error cmd %x from host\r\n", err);
 		return;
 	}
-
+	
+	rsp[0] = HID_REPORT_ID;
 	/* msg 0 STX */
-	rsp[0] = HOST_CMD_STX;
+	rsp[1] = HOST_CMD_STX;
 	/* msg 1 ts */
-	read_ts_64(rsp+1);
+	read_ts_64(rsp+2);
 	/* msg 9 msg_id */
 	if (err == MCU_ERR_SUCCESS) {
 		if (HOST_CMD == msg[1])
@@ -255,16 +265,16 @@ static void mcu_msg_handler(uint8_t *msg)
 	} else {
 		rsp_msg_id = 0xffff;
 	}
-	rsp[CMD_MSGID_1] = (rsp_msg_id >> 8) & 0xff;
-	rsp[CMD_MSGID_0] = rsp_msg_id & 0xff;
+	rsp[CMD_MSGID_1+1] = (rsp_msg_id >> 8) & 0xff;
+	rsp[CMD_MSGID_0+1] = rsp_msg_id & 0xff;
 	/* msg 11 reserve,payload len,payload */
 	if (err == MCU_ERR_SUCCESS) {
 		out_payload_len = fill_payload(msg_id, cmd, cmd_len,
-				rsp+CMD_RESERVE_OFS);
+				rsp+CMD_RESERVE_OFS+1);
 	} else {
-		rsp[CMD_PAYLOAD_LEN_0] = 0x01;
-		rsp[CMD_PAYLOAD_LEN_1] = 0x00;
-		rsp[CMD_PAYLOAD_OFS] = err;
+		rsp[CMD_PAYLOAD_LEN_0+1] = 0x01;
+		rsp[CMD_PAYLOAD_LEN_1+1] = 0x00;
+		rsp[CMD_PAYLOAD_OFS+1] = err;
 		out_payload_len = 1;
 
 	}
@@ -273,24 +283,25 @@ static void mcu_msg_handler(uint8_t *msg)
 	  rt_kprintf("-> %x\r\n",
 	  rsp[i]);*/
 	/* encrypt reserve, payload len, payload */
-	set_rc4_key(rsp[7]%10, rsp_msg_id, rsp+1);
-	rc4(rsp+CMD_RESERVE_OFS,
-			rsp+CMD_RESERVE_OFS, out_payload_len+2+4);
+	set_rc4_key(rsp[8]%10, rsp_msg_id, rsp+2);
+	rc4(rsp+CMD_RESERVE_OFS+1,
+			rsp+CMD_RESERVE_OFS+1, out_payload_len+2+4);
 	/* msg n crc */
 	uint16_t crc_ofs = 17 + out_payload_len;
 
-	uint32_t crc = crc32((uint8_t *)rsp, crc_ofs);
-	rsp[crc_ofs+3]   = (crc >> 24) & 0xff;
-	rsp[crc_ofs+2] = (crc >> 16) & 0xff;
-	rsp[crc_ofs+1] = (crc >> 8) & 0xff;
-	rsp[crc_ofs+0] = (crc >> 0) & 0xff;
-	rsp[62] = ((crc_ofs+4) >> 8) & 0xff;
-	rsp[63] = ((crc_ofs+4) >> 0) & 0xff;
+	uint32_t crc = crc32((uint8_t *)rsp+1, crc_ofs);
+	rsp[crc_ofs+4]   = (crc >> 24) & 0xff;
+	rsp[crc_ofs+3] = (crc >> 16) & 0xff;
+	rsp[crc_ofs+2] = (crc >> 8) & 0xff;
+	rsp[crc_ofs+1] = (crc >> 0) & 0xff;
+	rsp[62] = ((crc_ofs+5) >> 8) & 0xff;
+	rsp[63] = ((crc_ofs+5) >> 0) & 0xff;
 	//rt_kprintf("%d crc %x", crc_ofs, crc);
 	if (!insert_mem(TYPE_D2H, rsp, 64))
 		rt_kprintf("lost d2h packet\r\n");
 	notify_event(EVENT_ST2OV);
 }
+
 void notify_event(uint32_t _event)
 {
 	rt_event_send(&event_d2h, _event);
@@ -309,16 +320,12 @@ static void mcu_cmd_handler(void *param)
 	uint32_t status;
 	uint32_t state = EVENT_OV2ST | EVENT_ST2OV;	
 	
-	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
-	//normal_timer_init();	
 	while (1)
 	{
-	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
 		if (rt_event_recv(&event_d2h, state,
 					RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
 					RT_WAITING_FOREVER,
 					(rt_uint32_t *)&status) == RT_EOK)
-	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
 		{
 			if (status & EVENT_OV2ST) {
 				//rt_kprintf("%ld event 0x%x", read_ts(), status);
@@ -345,16 +352,9 @@ static void mcu_cmd_handler(void *param)
 
 void protocol_init()
 {
-	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
+	rt_sem_init(&ota_sem, "ota", 0, 0);
 	rt_memlist_init();
-	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
 	rt_event_init(&event_d2h, "bridge", RT_IPC_FLAG_FIFO);
-	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
-	//rt_thread_t tid = rt_thread_create("proto", mcu_cmd_handler, RT_NULL,
-	//		2048, 28, 20);
-	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
-	//rt_thread_startup(tid);
-	rt_kprintf("%s %d:\r\n", __func__, __LINE__);
     
     	rt_thread_init(&mcu_thread, "mcu", mcu_cmd_handler, RT_NULL,
                             mcu_stack, sizeof(mcu_stack), RT_THREAD_PRIORITY_MAX / 3, 20);

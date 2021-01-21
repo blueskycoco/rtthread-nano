@@ -16,6 +16,7 @@
 #include "rtthread.h"
 #include <string.h>
 
+#define HID_REPORT_ID		0x01
 /* The word "RYM" is stand for "Real-YModem". */
 
 enum rym_code
@@ -119,9 +120,6 @@ struct rym_ctx
     //rt_device_t dev;
 };
 
-rt_err_t _rym_do_recv(
-    struct rym_ctx *ctx,
-    int handshake_timeout);
 /* recv a file on device dev with ymodem session ctx.
  *
  * If an error happens, you can get where it is failed from ctx->stage.
@@ -174,4 +172,5 @@ rt_err_t _rym_do_recv(
 //                            rym_callback on_begin, rym_callback on_data, rym_callback on_end,
 //                            int handshake_timeout);
 
+void ota_start();
 #endif

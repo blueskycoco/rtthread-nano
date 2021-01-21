@@ -16,8 +16,6 @@
 #include "utils.h"
 #include "mcu.h"
 
-struct rym_ctx ctx;
-struct rt_semaphore sem;
 void led_init()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -31,23 +29,18 @@ void led_init()
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
+
 int main(void)
 {
 	uint8_t flag = 0;
-	//rt_sem_init(&sem, "shrx", 0, 0);
 	led_init();
 
-	//rt_sem_take(&sem, RT_WAITING_FOREVER);
-	//uart_rx_set();
-	//_rym_do_recv(&ctx, RT_WAITING_FOREVER);
-    	//rt_hw_interrupt_disable();
-
-	if (warm_boot())
+	if (warm_boot()) {
 		protocol_init();
-	
-	verify_and_jump();
-	
-	protocol_init();
+	} else {
+		verify_and_jump();
+		protocol_init();
+	}
 
 	while (1)
 	{

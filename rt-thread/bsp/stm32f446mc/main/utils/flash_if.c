@@ -55,14 +55,15 @@ void FLASH_If_Init(void)
   * @retval 0: user flash area successfully erased
   *         1: error occurred
   */
-uint32_t FLASH_If_Erase(uint32_t StartSector)
+uint32_t FLASH_If_Erase(uint32_t StartSector, uint32_t EndSector)
 {
-  uint32_t UserStartSector = FLASH_Sector_1, i = 0;
+  uint32_t UserStartSector = FLASH_Sector_1, i = 0, UserEndSector;
 
   /* Get the sector where start the user flash area */
-  UserStartSector = GetSector(APPLICATION_ADDRESS);
+  UserStartSector = GetSector(StartSector);
+  UserEndSector = GetSector(EndSector);
 
-  for(i = UserStartSector; i <= FLASH_Sector_11; i += 8)
+  for(i = UserStartSector; i <= UserEndSector; i += 8)
   {
     /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
        be done by word */ 
@@ -121,12 +122,12 @@ uint32_t FLASH_If_Write(__IO uint32_t* FlashAddress, uint32_t* Data ,uint32_t Da
   * @retval 0: No write protected sectors inside the user flash area
   *         1: Some sectors inside the user flash area are write protected
   */
-uint16_t FLASH_If_GetWriteProtectionStatus(void)
+uint16_t FLASH_If_GetWriteProtectionStatus(uint32_t addr)
 {
   uint32_t UserStartSector = FLASH_Sector_1;
 
   /* Get the sector where start the user flash area */
-  UserStartSector = GetSector(APPLICATION_ADDRESS);
+  UserStartSector = GetSector(addr);
 
   /* Check if there are write protected sectors inside the user flash area */
   if ((FLASH_OB_GetWRP() >> (UserStartSector/8)) == (0xFFF >> (UserStartSector/8)))
@@ -145,12 +146,12 @@ uint16_t FLASH_If_GetWriteProtectionStatus(void)
   * @retval 1: Write Protection successfully disabled
   *         2: Error: Flash write unprotection failed
   */
-uint32_t FLASH_If_DisableWriteProtection(void)
+uint32_t FLASH_If_DisableWriteProtection(uint32_t addr)
 {
   __IO uint32_t UserStartSector = FLASH_Sector_1, UserWrpSectors = OB_WRP_Sector_1;
 
   /* Get the sector where start the user flash area */
-  UserStartSector = GetSector(APPLICATION_ADDRESS);
+  UserStartSector = GetSector(addr);
 
   /* Mark all sectors inside the user flash area as non protected */  
   UserWrpSectors = 0xFFF-((1 << (UserStartSector/8))-1);

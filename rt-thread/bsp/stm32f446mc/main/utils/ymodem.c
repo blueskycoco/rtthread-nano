@@ -9,57 +9,36 @@
  * 2013-04-14     Grissiom     initial implementation
  * 2019-12-09     Steven Liu   add YMODEM send protocol
  */
-
+#include <rtthread.h>
 #include <rthw.h>
 #include "ymodem.h"
 #include "flash_if.h"
 #include <stdint.h>
 #include <stdlib.h>
-#ifdef YMODEM_USING_CRC_TABLE 
-static const rt_uint16_t ccitt_table[256] =
-{
-	0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
-	0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
-	0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
-	0x9339, 0x8318, 0xB37B, 0xA35A, 0xD3BD, 0xC39C, 0xF3FF, 0xE3DE,
-	0x2462, 0x3443, 0x0420, 0x1401, 0x64E6, 0x74C7, 0x44A4, 0x5485,
-	0xA56A, 0xB54B, 0x8528, 0x9509, 0xE5EE, 0xF5CF, 0xC5AC, 0xD58D,
-	0x3653, 0x2672, 0x1611, 0x0630, 0x76D7, 0x66F6, 0x5695, 0x46B4,
-	0xB75B, 0xA77A, 0x9719, 0x8738, 0xF7DF, 0xE7FE, 0xD79D, 0xC7BC,
-	0x48C4, 0x58E5, 0x6886, 0x78A7, 0x0840, 0x1861, 0x2802, 0x3823,
-	0xC9CC, 0xD9ED, 0xE98E, 0xF9AF, 0x8948, 0x9969, 0xA90A, 0xB92B,
-	0x5AF5, 0x4AD4, 0x7AB7, 0x6A96, 0x1A71, 0x0A50, 0x3A33, 0x2A12,
-	0xDBFD, 0xCBDC, 0xFBBF, 0xEB9E, 0x9B79, 0x8B58, 0xBB3B, 0xAB1A,
-	0x6CA6, 0x7C87, 0x4CE4, 0x5CC5, 0x2C22, 0x3C03, 0x0C60, 0x1C41,
-	0xEDAE, 0xFD8F, 0xCDEC, 0xDDCD, 0xAD2A, 0xBD0B, 0x8D68, 0x9D49,
-	0x7E97, 0x6EB6, 0x5ED5, 0x4EF4, 0x3E13, 0x2E32, 0x1E51, 0x0E70,
-	0xFF9F, 0xEFBE, 0xDFDD, 0xCFFC, 0xBF1B, 0xAF3A, 0x9F59, 0x8F78,
-	0x9188, 0x81A9, 0xB1CA, 0xA1EB, 0xD10C, 0xC12D, 0xF14E, 0xE16F,
-	0x1080, 0x00A1, 0x30C2, 0x20E3, 0x5004, 0x4025, 0x7046, 0x6067,
-	0x83B9, 0x9398, 0xA3FB, 0xB3DA, 0xC33D, 0xD31C, 0xE37F, 0xF35E,
-	0x02B1, 0x1290, 0x22F3, 0x32D2, 0x4235, 0x5214, 0x6277, 0x7256,
-	0xB5EA, 0xA5CB, 0x95A8, 0x8589, 0xF56E, 0xE54F, 0xD52C, 0xC50D,
-	0x34E2, 0x24C3, 0x14A0, 0x0481, 0x7466, 0x6447, 0x5424, 0x4405,
-	0xA7DB, 0xB7FA, 0x8799, 0x97B8, 0xE75F, 0xF77E, 0xC71D, 0xD73C,
-	0x26D3, 0x36F2, 0x0691, 0x16B0, 0x6657, 0x7676, 0x4615, 0x5634,
-	0xD94C, 0xC96D, 0xF90E, 0xE92F, 0x99C8, 0x89E9, 0xB98A, 0xA9AB,
-	0x5844, 0x4865, 0x7806, 0x6827, 0x18C0, 0x08E1, 0x3882, 0x28A3,
-	0xCB7D, 0xDB5C, 0xEB3F, 0xFB1E, 0x8BF9, 0x9BD8, 0xABBB, 0xBB9A,
-	0x4A75, 0x5A54, 0x6A37, 0x7A16, 0x0AF1, 0x1AD0, 0x2AB3, 0x3A92,
-	0xFD2E, 0xED0F, 0xDD6C, 0xCD4D, 0xBDAA, 0xAD8B, 0x9DE8, 0x8DC9,
-	0x7C26, 0x6C07, 0x5C64, 0x4C45, 0x3CA2, 0x2C83, 0x1CE0, 0x0CC1,
-	0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
-	0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
-};
-static rt_uint16_t CRC16(unsigned char *q, int len)
-{
-	rt_uint16_t crc = 0;
 
-	while (len-- > 0)
-		crc = (crc << 8) ^ ccitt_table[((crc >> 8) ^ *q++) & 0xff];
-	return crc;
-}
-#else
+#define PARAM_S_ADDRESS 	0x08008000
+#define PARAM_E_ADDRESS		0x0800bfff
+#define APP_S_ADDRESS 		0x08020000
+#define APP_E_ADDRESS		0x0805ffff
+#define FW_LEN_OFS		0x00
+#define FW_MD5_OFS		0x04
+// we could only use global varible because we could not use
+// rt_device_t->user_data(it is used by the serial driver)...
+extern struct rt_semaphore ota_sem;
+
+extern void uart_tx_set();
+//extern void uart_rx_set();
+extern uint8_t uart_rx_buf[64];
+extern uint8_t uart_tx_buf[64];
+static uint8_t param[16384] = {0};
+static uint32_t g_ofs = 0;
+/* SOH/STX + seq + payload + crc */
+#define _RYM_SOH_PKG_SZ (1+2+128+2)
+#define _RYM_STX_PKG_SZ (1+2+1024+2)
+ALIGN(8)
+static rt_uint8_t ota_stack[2048];
+struct rt_thread ota_thread;
+
 static rt_uint16_t CRC16(unsigned char *q, int len)
 {
 	rt_uint16_t crc;
@@ -82,20 +61,6 @@ static rt_uint16_t CRC16(unsigned char *q, int len)
 
 	return (crc);
 }
-#endif
-
-// we could only use global varible because we could not use
-// rt_device_t->user_data(it is used by the serial driver)...
-extern struct rt_semaphore sem;
-
-extern void uart_tx_set();
-extern void uart_rx_set();
-extern uint8_t uart_rx_buf[64];
-extern uint8_t uart_tx_buf[64];
-
-/* SOH/STX + seq + payload + crc */
-#define _RYM_SOH_PKG_SZ (1+2+128+2)
-#define _RYM_STX_PKG_SZ (1+2+1024+2)
 
 static enum rym_code _rym_read_code(
 		struct rym_ctx *ctx,
@@ -104,15 +69,15 @@ static enum rym_code _rym_read_code(
 	do
 	{
 		/* No data yet, wait for one */
-		if (rt_sem_take(&sem, timeout) != RT_EOK) {
-			uart_rx_set();
+		if (rt_sem_take(&ota_sem, timeout) != RT_EOK) {
+			//uart_rx_set();
 			rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
 			return RYM_CODE_NONE;
 		}
 
 		/* Try to read one */
-		ctx->buf[0] = uart_rx_buf[0];
-		uart_rx_set();
+		ctx->buf[0] = uart_rx_buf[1];
+		//uart_rx_set();
 		return (enum rym_code)(*ctx->buf);
 	}
 	while (1);
@@ -127,30 +92,31 @@ static rt_size_t _rym_read_data(
 	rt_uint8_t *buf = ctx->buf;// + 1;
 	rt_size_t readlen = 0;
 
-	while (rt_sem_take(&sem, RYM_WAIT_CHR_TICK) == RT_EOK)
+	while (rt_sem_take(&ota_sem, RYM_WAIT_CHR_TICK) == RT_EOK)
 	{
-		if ((len-readlen) > 64) {
-			memcpy(buf+readlen, uart_rx_buf, 64);
-			readlen += 64;
+		if ((len-readlen) > 63) {
+			memcpy(buf+readlen, uart_rx_buf+1, 63);
+			readlen += 63;
 		} else {
-			memcpy(buf+readlen, uart_rx_buf, len - readlen);
+			memcpy(buf+readlen, uart_rx_buf+1, len - readlen);
 			readlen = len;
 		}
-		uart_rx_set();
+		//uart_rx_set();
 		if (readlen >= len) {
 			return readlen;
 		}
 	}
 
-	uart_rx_set();
+	//uart_rx_set();
 	return readlen;
 }
 
 static rt_size_t _rym_putchar(struct rym_ctx *ctx, rt_uint8_t code)
 {
-	uart_tx_buf[0] = code;
+	uart_tx_buf[0] = HID_REPORT_ID;
+	uart_tx_buf[1] = code;
 	uart_tx_set();
-	rt_sem_take(&sem, RT_WAITING_FOREVER);
+	rt_sem_take(&ota_sem, RT_WAITING_FOREVER);
 	return 1;
 }
 
@@ -160,6 +126,7 @@ static rt_err_t _rym_do_handshake(
 {
 	enum rym_code code;
 	rt_size_t i;
+	uint8_t md5[16];
 	rt_uint16_t recv_crc, cal_crc;
 	rt_size_t data_sz = _RYM_SOH_PKG_SZ;
 	rt_uint8_t fpath[32] = {0};
@@ -207,6 +174,7 @@ static rt_err_t _rym_do_handshake(
 		return -RYM_ERR_CRC;
 
 	/* congratulations, check passed. */
+#if 0
 	fpath[0] = '/';
 	i = 3;
 	j = 1;
@@ -215,7 +183,26 @@ static rt_err_t _rym_do_handshake(
 	}
 	flen = atoi(1 + (const char *)(ctx->buf+3) +
 			rt_strnlen((const char *)(ctx->buf+3), data_sz - 6));
-	rt_kprintf("handshake ok, rcv name %s, len %d\r\n", fpath, flen);
+#else
+	flen =  (ctx->buf[4] << 24) |
+		(ctx->buf[5] << 16) |
+		(ctx->buf[6] <<  8) |
+		(ctx->buf[7] <<  0);
+	rt_memcpy(md5, ctx->buf + 8, 16);
+#endif
+	rt_kprintf("handshake ok, fw len %d, md5: \r\n", flen);
+	for (i=0; i<16; i++)
+		rt_kprintf("%02x", md5[i]);
+	rt_kprintf("\r\n");
+
+	if (!FLASH_If_GetWriteProtectionStatus(PARAM_S_ADDRESS))
+		FLASH_If_DisableWriteProtection(PARAM_S_ADDRESS);
+	rt_memcpy(param, (const void *)PARAM_S_ADDRESS, 16384);
+	rt_memcpy(param, ctx->buf+4, 20);
+	FLASH_If_Erase(PARAM_S_ADDRESS, PARAM_E_ADDRESS);
+	FLASH_If_Erase(APP_S_ADDRESS, APP_E_ADDRESS);
+	FLASH_If_Write((__IO uint32_t *)PARAM_S_ADDRESS, (uint32_t *)param, 4096);	
+	g_ofs = 0;
 	return RT_EOK;
 }
 
@@ -252,7 +239,9 @@ static rt_err_t _rym_trans_data(
 			*(ctx->buf + tsz-1);
 	if (recv_crc != CRC16(ctx->buf + 3, data_sz))
 		return -RYM_ERR_CRC;
-
+	FLASH_If_Write((__IO uint32_t *)(APP_S_ADDRESS + g_ofs),
+			(uint32_t *)(ctx->buf+3), data_sz/4);
+	g_ofs += (data_sz/4);
 	/* congratulations, check passed. */
 	*code = RYM_CODE_ACK;
 	return RT_EOK;
@@ -369,14 +358,13 @@ static rt_err_t _rym_do_fin(struct rym_ctx *ctx)
 	return RT_EOK;
 }
 
-rt_err_t _rym_do_recv(
+static rt_err_t _rym_do_recv(
 		struct rym_ctx *ctx,
 		int handshake_timeout)
 {
 	rt_err_t err;
 
 	ctx->stage = RYM_STAGE_NONE;
-	FLASH_If_Init();
 
 	err = _rym_do_handshake(ctx, handshake_timeout);
 	if (err != RT_EOK)
@@ -397,9 +385,25 @@ rt_err_t _rym_do_recv(
 			return err;
 		}
 
-		if (ctx->stage == RYM_STAGE_FINISHED)
+		if (ctx->stage == RYM_STAGE_FINISHED) {
+			verify_and_jump();
 			break;
+		}
 	}
 	return err;
 }
 
+static void ota_handler(void *param)
+{
+	struct rym_ctx ctx;
+	while (1)
+		_rym_do_recv(&ctx, RT_WAITING_FOREVER);
+}
+
+void ota_start()
+{
+	FLASH_If_Init();
+    	rt_thread_init(&ota_thread, "ota", ota_handler, RT_NULL,
+                            ota_stack, sizeof(ota_stack), RT_THREAD_PRIORITY_MAX / 3, 20);
+	rt_thread_startup(&ota_thread);
+}

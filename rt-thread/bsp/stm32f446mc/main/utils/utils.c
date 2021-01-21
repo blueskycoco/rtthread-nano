@@ -37,6 +37,13 @@ void read_ts_64(uint8_t *ts)
 	rt_memset(ts, 0, 8);
 }
 
+void reboot()
+{
+	RTC_WriteBackupRegister(RTC_BKP_DR0, 0x00);
+	__set_FAULTMASK(1);
+	NVIC_SystemReset();
+}
+
 void dump_mcu_cmd(uint16_t msg_id, uint16_t cmd_id,
 		uint8_t *payload, uint16_t len)
 {
@@ -50,7 +57,7 @@ void dump_mcu_cmd(uint16_t msg_id, uint16_t cmd_id,
 		break;
 		
 		case MSG_ID_SW_VER:
-		strcpy(tmp,"MSG_ID_SW_VER: ");
+		strcpy(tmp, "MSG_ID_SW_VER: ");
 		break;
 		
 		case HEART_CMD:
@@ -219,7 +226,7 @@ void dump_mcu_cmd(uint16_t msg_id, uint16_t cmd_id,
 		}
 	}
 
-	rt_kprintf("[%10lld]: %s", ts.m_int64/1000, tmp);
+	rt_kprintf("%d: %s\r\n", msg_id, tmp);
 	if (len != 0 &&
 		msg_id != DEVICE_EVENT_MAG &&
 		msg_id != HEART_CMD &&

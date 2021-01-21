@@ -49,15 +49,15 @@
 
 /* Define the address from where user application will be loaded.
    Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
-#define APPLICATION_ADDRESS   (uint32_t)0x08004000 
+#define APPLICATION_ADDRESS   (uint32_t)0x08008000 
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void FLASH_If_Init(void);
-uint32_t FLASH_If_Erase(uint32_t StartSector);
+uint32_t FLASH_If_Erase(uint32_t StartSector, uint32_t EndSector);
 uint32_t FLASH_If_Write(__IO uint32_t* FlashAddress, uint32_t* Data, uint32_t DataLength);
-uint16_t FLASH_If_GetWriteProtectionStatus(void);
-uint32_t FLASH_If_DisableWriteProtection(void);
+uint16_t FLASH_If_GetWriteProtectionStatus(uint32_t addr);
+uint32_t FLASH_If_DisableWriteProtection(uint32_t addr);
 
 #endif  /* __FLASH_IF_H */
 
