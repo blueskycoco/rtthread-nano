@@ -9,9 +9,12 @@ extern uint8_t uart_rx_buf[64];
 extern uint8_t uart_tx_buf[64];
 rt_bool_t warm_boot()
 {
-	uint32_t flag = RTC_ReadBackupRegister(RTC_BKP_DR0);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+	PWR_BackupAccessCmd(ENABLE);
 
+	uint32_t flag = RTC_ReadBackupRegister(RTC_BKP_DR0);
 	rt_kprintf("warm boot: %x\r\n", flag);
+	PWR_BackupAccessCmd(DISABLE);
 	if (flag == TYPE_WARM_BOOT)
 		return RT_TRUE;
 

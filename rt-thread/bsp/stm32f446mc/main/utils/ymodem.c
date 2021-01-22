@@ -138,11 +138,11 @@ static rt_size_t _rym_read_data(
 		}
 		//uart_rx_set();
 		if (readlen == 0) {
-			rt_kprintf("%s %d: readlen %d, %x %x %x\r\n", __func__, __LINE__,
-					readlen, buf[0], buf[1], buf[2]);
-			for (i=0; i<len; i++)
-				rt_kprintf("%02x ", buf[i]);
-			rt_kprintf("\r\n");
+			//rt_kprintf("%s %d: readlen %d, %x %x %x\r\n", __func__, __LINE__,
+			//		readlen, buf[0], buf[1], buf[2]);
+			//for (i=0; i<len; i++)
+			//	rt_kprintf("%02x ", buf[i]);
+			//rt_kprintf("\r\n");
 			return len;
 		}
 		} while (cmd_len != 0);
