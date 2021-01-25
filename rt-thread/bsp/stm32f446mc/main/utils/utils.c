@@ -42,7 +42,7 @@ void read_ts_64(uint8_t *ts)
 
 void reboot()
 {
-	RTC_WriteBackupRegister(RTC_BKP_DR0, 0x00);
+	//RTC_WriteBackupRegister(RTC_BKP_DR0, 0x00);
 	__set_FAULTMASK(1);
 	NVIC_SystemReset();
 }

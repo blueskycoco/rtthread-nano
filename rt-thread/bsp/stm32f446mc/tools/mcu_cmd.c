@@ -336,7 +336,20 @@ int enter_ota()
 		}
 		printf("\r\n");
 	}
-
+	do {
+		rsp_len = hid_xfer(dev, EP_MCU_IN, rsp, 64, 1000);
+		printf("rsp len %d\r\n", rsp_len);
+		for (i=0; i<rsp_len; i++) {
+			if (i%16 == 0 && i != 0)
+				printf("\r\n");
+			printf("%02x ", rsp[i]);
+		}
+		printf("\r\n");
+		if (rsp[1] == 0x43) {
+			close_usb(dev, INTF_MCU);
+			return 0;
+		}
+	} while (rsp_len > 0);
 	//usb_xfer(dev, USB_ENDPOINT_OUT, 0xE2, 0x00, 0x01, NULL, 0);
 	//usb_xfer(dev, USB_ENDPOINT_IN, 0xE1, 0x00, 0x01, &glasses_v, 1);
 	//printf("glasses protocol version: %d\r\n", glasses_v);

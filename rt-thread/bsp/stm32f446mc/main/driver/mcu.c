@@ -321,6 +321,10 @@ static void mcu_cmd_handler(void *param)
 	uint32_t status;
 	uint32_t state = EVENT_OV2ST | EVENT_ST2OV;	
 	
+	do {
+		remove_mem(TYPE_H2D, &cmd, &len);
+	} while (len != 0);
+
 	while (1)
 	{
 		if (rt_event_recv(&event_d2h, state,
