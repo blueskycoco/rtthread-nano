@@ -75,15 +75,15 @@ static enum rym_code _rym_read_code(
 		/* No data yet, wait for one */
 		if (rt_sem_take(&ota_sem, timeout) != RT_EOK) {
 			//uart_rx_set();
-			rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
+			//rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
 			return RYM_CODE_NONE;
 		}
 		remove_mem(TYPE_H2D, &cmd, &len);
 		if (len == 0)
 			continue;
 
-		rt_kprintf("%s %d: %x %x\r\n", __func__, __LINE__, cmd[0],
-				cmd[1]);
+		//rt_kprintf("%s %d: %x %x\r\n", __func__, __LINE__, cmd[0],
+		//		cmd[1]);
 		/* Try to read one */
 		ctx->buf[0] = cmd[1];
 		//uart_rx_set();
@@ -148,8 +148,8 @@ static rt_size_t _rym_read_data(
 		} while (cmd_len != 0);
 	}
 
-			rt_kprintf("%s %d: readlen %d\r\n", __func__, __LINE__,
-					readlen);
+			//rt_kprintf("%s %d: readlen %d\r\n", __func__, __LINE__,
+			//		readlen);
 	//uart_rx_set();
 	return len;
 }
@@ -183,7 +183,7 @@ static rt_err_t _rym_do_handshake(
 		_rym_putchar(ctx, RYM_CODE_C);
 		code = _rym_read_code(ctx,
 				100);
-		rt_kprintf("%s %d code %x\r\n", __func__, __LINE__, code);
+		//rt_kprintf("%s %d code %x\r\n", __func__, __LINE__, code);
 		if (code == RYM_CODE_SOH)
 		{
 			data_sz = _RYM_SOH_PKG_SZ;
@@ -195,13 +195,13 @@ static rt_err_t _rym_do_handshake(
 			break;
 		}
 	}
-	rt_kprintf("%s %d: i %d, tm_sec %d\r\n", __func__, __LINE__,
-			i, tm_sec);
+	//rt_kprintf("%s %d: i %d, tm_sec %d\r\n", __func__, __LINE__,
+	//		i, tm_sec);
 	if (i == tm_sec)
 	{
 		return -RYM_ERR_TMO;
 	}
-
+	rt_thread_mdelay(10);
 	/* receive all data */
 	i = _rym_read_data(ctx, data_sz);
 
@@ -273,12 +273,12 @@ static rt_err_t _rym_trans_data(
 	rt_size_t i = _rym_read_data(ctx, tsz);
 	if (i != tsz)
 		return -RYM_ERR_DSZ;
-	rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	//rt_kprintf("%s %d\r\n", __func__, __LINE__);
 	if ((ctx->buf[1] + ctx->buf[2]) != 0xFF)
 	{
 		return -RYM_ERR_SEQ;
 	}
-	rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	//rt_kprintf("%s %d\r\n", __func__, __LINE__);
 	/* As we are sending C continuously, there is a chance that the
 	 * sender(remote) receive an C after sending the first handshake package.
 	 * So the sender will interpret it as NAK and re-send the package. So we
@@ -289,7 +289,7 @@ static rt_err_t _rym_trans_data(
 		return RT_EOK;
 	}
 
-	rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	//rt_kprintf("%s %d\r\n", __func__, __LINE__);
 	ctx->stage = RYM_STAGE_TRANSMITTING;
 	/* sanity check */
 	recv_crc = (rt_uint16_t)(*(ctx->buf + tsz - 2) << 8) |
@@ -312,7 +312,7 @@ static rt_err_t _rym_trans_data(
 
 static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 {
-	rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	//rt_kprintf("%s %d\r\n", __func__, __LINE__);
 	_rym_putchar(ctx, RYM_CODE_ACK);
 	rt_thread_mdelay(250);
 	_rym_putchar(ctx, RYM_CODE_C);
@@ -325,7 +325,9 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 		rt_size_t data_sz, i;
 		code = _rym_read_code(ctx,
 				RYM_WAIT_PKG_TICK);
-	rt_kprintf("%s %d, code %x\r\n", __func__, __LINE__, code);
+		//??
+		//rt_kprintf("%s %d, code %x\r\n", __func__, __LINE__, code);
+		rt_thread_mdelay(10);
 		switch (code)
 		{
 			case RYM_CODE_SOH:
@@ -393,7 +395,9 @@ static rt_err_t _rym_do_fin(struct rym_ctx *ctx)
 	}
 	else
 		return -RYM_ERR_CODE;
-	rt_kprintf("data_sz %d\r\n", data_sz);
+	//???
+	//rt_kprintf("data_sz %d\r\n", data_sz);
+	rt_thread_mdelay(10);
 	i = _rym_read_data(ctx, data_sz);
 	if (i != (data_sz))
 		return -RYM_ERR_DSZ;

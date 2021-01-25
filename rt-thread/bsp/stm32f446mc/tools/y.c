@@ -217,7 +217,7 @@ static int _rym_do_send_trans(struct rym_ctx *ctx)
 			ctx->stage = RYM_STAGE_FINISHING;
 		printf("\033[1A");
 		printf("\033[K");
-		printf("%s %d: sending %d %d...%d %d\r\n", __func__, __LINE__,
+		printf("%s %d: sending %d %d...%d %d", __func__, __LINE__,
 				index, ofs, g_file_len, ctx->stage);
 		_rym_send_packet(ctx, code, index);
 		index++;
