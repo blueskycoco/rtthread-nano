@@ -51,8 +51,8 @@ static enum rym_code _rym_read_code(
 		/* No data yet, wait for one */
 
 		rsz = hid_xfer(handle, 0x81, uart_rx_buf, 64, 1000);
-		printf("readcode %d %x %x\r\n", rsz, 
-				uart_rx_buf[0], uart_rx_buf[1]);
+		//printf("readcode %d %x %x\r\n", rsz, 
+		//		uart_rx_buf[0], uart_rx_buf[1]);
 		if (rsz != 64) {
 			return RYM_CODE_NONE;
 		}
@@ -118,8 +118,8 @@ static size_t _rym_getchar(struct rym_ctx *ctx)
 			printf("getchar timeout\r\n");
 			continue;
 		}
-		printf("getchar %d %x %x\r\n", rsz,
-				uart_rx_buf[0], uart_rx_buf[1]);
+		//printf("getchar %d %x %x\r\n", rsz,
+		//		uart_rx_buf[0], uart_rx_buf[1]);
 		getc_ack = uart_rx_buf[1];
 		break;
 	}
@@ -217,7 +217,7 @@ static int _rym_do_send_trans(struct rym_ctx *ctx)
 			ctx->stage = RYM_STAGE_FINISHING;
 		printf("\033[1A");
 		printf("\033[K");
-		printf("%s %d: sending %d %d...%d %d", __func__, __LINE__,
+		printf("sending %d %d...%d %d\r\n",
 				index, ofs, g_file_len, ctx->stage);
 		_rym_send_packet(ctx, code, index);
 		index++;
