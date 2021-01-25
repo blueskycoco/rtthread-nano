@@ -194,6 +194,11 @@ static uint16_t fill_payload(uint16_t msg_id, uint8_t *cmd, uint16_t cmd_len,
 				rsp[15] = (sw_build_date >> 16) & 0xff;
 				rsp[14] = (sw_build_date >> 8) & 0xff;
 				rsp[13] = (sw_build_date >> 0) & 0xff;
+				rsp[17] = 'b';
+				rsp[18] = 'o';
+				rsp[19] = 'o';
+				rsp[20] = 't';
+				payload_len = 15;
 			} else {
 				rsp[8] = (hw_major_version >> 8) & 0xff;
 				rsp[7] = hw_major_version & 0xff;
@@ -205,8 +210,8 @@ static uint16_t fill_payload(uint16_t msg_id, uint8_t *cmd, uint16_t cmd_len,
 				rsp[15] = (hw_build_date >> 16) & 0xff;
 				rsp[14] = (hw_build_date >> 8) & 0xff;
 				rsp[13] = (hw_build_date >> 0) & 0xff;
+				payload_len = 11;
 			}
-			payload_len = 11;
 			break;
 		case MSG_ID_OTA:
 			rsp[6] = MCU_ERR_SUCCESS;
