@@ -40,6 +40,7 @@ void USART2_IRQHandler()
 		USART_ClearFlag(USART2,USART_FLAG_ORE);
 	}
 }
+#if 0
 void DMA1_Channel4_5_IRQHandler(void)
 {
 	rt_interrupt_enter();
@@ -59,3 +60,4 @@ void DMA1_Channel4_5_IRQHandler(void)
 	}
 	rt_interrupt_leave();
 }
+#endif

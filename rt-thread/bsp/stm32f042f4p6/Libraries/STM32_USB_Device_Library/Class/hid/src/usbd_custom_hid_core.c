@@ -2,6 +2,7 @@
 #include "usbd_custom_hid_core.h"
 #include "mem_list.h"
 
+extern uint32_t sof_timer;
 extern rt_bool_t hid_sent;
 uint8_t  USBD_HID_Init (void  *pdev, uint8_t cfgidx);
 uint8_t  USBD_HID_DeInit (void  *pdev, uint8_t cfgidx);
@@ -10,6 +11,7 @@ uint8_t  *USBD_HID_GetCfgDesc (uint8_t speed, uint16_t *length);
 uint8_t  USBD_HID_DataIn (void  *pdev, uint8_t epnum);
 uint8_t  USBD_HID_DataOut (void  *pdev, uint8_t epnum);
 uint8_t  USBD_HID_EP0_RxReady (void  *pdev);
+uint8_t  USBD_HID_SOF (void  *pdev);
 
 USBD_Class_cb_TypeDef  USBD_HID_cb = 
 {
@@ -20,7 +22,7 @@ USBD_Class_cb_TypeDef  USBD_HID_cb =
 	USBD_HID_EP0_RxReady,	/*EP0_RxReady*/
 	USBD_HID_DataIn,	/*DataIn*/
 	USBD_HID_DataOut,	/*DataOut*/
-	NULL,			/*SOF */
+	USBD_HID_SOF,			/*SOF */
 	USBD_HID_GetCfgDesc, 
 };
 
@@ -163,6 +165,11 @@ uint8_t  USBD_HID_DeInit (void  *pdev, uint8_t cfgidx)
 	return USBD_OK;
 }
 
+uint8_t  USBD_HID_SOF (void  *pdev)
+{
+	sof_timer++;
+	sof_int();
+}
 /**
  * @brief  USBD_HID_Setup
  *         Handle the HID specific requests
@@ -328,7 +335,7 @@ uint8_t  USBD_HID_DataIn (void  *pdev,
 {
 	if (epnum == 1) {
 		hid_sent = RT_TRUE;
-		notify_uart2hid();
+		//notify_uart2hid();
 	}
 	return USBD_OK;
 }
@@ -344,8 +351,8 @@ uint8_t  USBD_HID_DataOut (void  *pdev,
 		uint8_t epnum)
 {
 	if (epnum == 0x01) {
-		if (insert_mem(TYPE_HID2UART, Report_buf))
-			notify_hid2uart();
+		//if (insert_mem(TYPE_HID2UART, Report_buf))
+		//	notify_hid2uart();
 	
 		DCD_EP_PrepareRx(pdev,HID_IN_EP,Report_buf, 64);
 	}

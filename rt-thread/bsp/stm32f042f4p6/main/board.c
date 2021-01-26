@@ -128,7 +128,7 @@ static int uart_init(void)
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	USART_InitStructure.USART_BaudRate = 2000000;
+	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -137,7 +137,7 @@ static int uart_init(void)
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_Init(USART2, &USART_InitStructure);
 
-	uart_dma_config();
+	//uart_dma_config();
 
 	USART_ITConfig(USART2, USART_IT_ORE, ENABLE);
 	//USART_ITConfig(USART2, USART_IT_PE, ENABLE);
@@ -155,7 +155,6 @@ void rt_hw_console_output(const char *str)
 {   
 	rt_size_t i = 0, size = 0;
 	char a = '\r';
-	return;
 	size = rt_strlen(str);
 	for (i = 0; i < size; i++)
 	{

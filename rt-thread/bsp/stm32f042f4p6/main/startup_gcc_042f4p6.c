@@ -43,6 +43,7 @@ extern void HardFault_Handler(void);
 extern void USB_IRQHandler(void);
 extern void EXTI0_1_IRQHandler(void);
 extern void DMA1_Channel4_5_IRQHandler(void);
+extern void SPI1_IRQHandler(void);
 //*****************************************************************************
 //
 // External declaration for the interrupt handler used by the application.
@@ -99,7 +100,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,	//	TSC_IRQHandler    
 	IntDefaultHandler,    //	DMA1_Channel1_IRQHandler
 	IntDefaultHandler,    //	DMA1_Channel2_3_IRQHandler
-	DMA1_Channel4_5_IRQHandler,    //	DMA1_Channel4_5_IRQHandler
+	IntDefaultHandler,    //	DMA1_Channel4_5_IRQHandler
 	IntDefaultHandler,    //	ADC1_IRQHandler
 	IntDefaultHandler,    //	TIM1_BRK_IRQHandler
 	IntDefaultHandler,    //	TIM1_CC_IRQHandler
@@ -113,7 +114,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	TIM17_IRQHandler
 	IntDefaultHandler,    //	I2C1_IRQHandler
 	0,		    //	I2C2_IRQHandler
-	IntDefaultHandler,    //	SPI1_IRQHandler
+	SPI1_IRQHandler,    //	SPI1_IRQHandler
 	IntDefaultHandler,    //	SPI2_IRQHandler
 	IntDefaultHandler,    //	USART1_IRQHandler
 	USART2_IRQHandler,    //	USART2_IRQHandler

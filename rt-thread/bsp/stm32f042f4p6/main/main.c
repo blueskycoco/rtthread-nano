@@ -19,6 +19,8 @@
 rt_bool_t hid_sent = RT_TRUE;
 extern rt_uint8_t uart_tx_buf[64];
 static struct rt_event event;
+uint32_t sof_timer = 0;
+struct rt_semaphore sof_sem;
 USB_CORE_HANDLE  USB_Device_dev ;
 void led_init()
 {
@@ -34,27 +36,6 @@ void led_init()
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
-void uart_dma_tx_open()
-{
-	DMA1_Channel4->CNDTR = 64;
-	DMA_Cmd(DMA1_Channel4, ENABLE);
-}
-
-void uart_dma_rx_open()
-{
-	DMA1_Channel5->CNDTR = 64;
-	DMA_Cmd(DMA1_Channel5, ENABLE);
-}
-
-void notify_uart2hid()
-{
-	rt_event_send(&event, EVENT_UART2HID);
-}
-
-void notify_hid2uart()
-{
-	rt_event_send(&event, EVENT_HID2UART);
-}
 void led_blink()
 {
 	static rt_bool_t flag = RT_FALSE;
@@ -66,14 +47,19 @@ void led_blink()
 		flag = RT_TRUE;
 	}
 }
+
+void sof_int()
+{
+    rt_sem_release(&sof_sem);
+}
+
 int main(void)
 {
 	rt_uint32_t status;
 	rt_uint8_t *hid;
-	rt_uint8_t *uart;
+	rt_uint8_t imu[64];
 
-	rt_memlist_init();
-	rt_event_init(&event, "bridge", RT_IPC_FLAG_FIFO);
+    	rt_sem_init(&sof_sem, "sem", 0, 0);
 	led_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 	SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;
@@ -82,31 +68,16 @@ int main(void)
 			&USR_desc, 
 			&USBD_HID_cb, 
 			&USR_cb);
+	init_imu();
 	while (1)
 	{
-		if (rt_event_recv(&event, EVENT_HID2UART | EVENT_UART2HID,
-					RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR,
-					RT_WAITING_FOREVER, &status) == RT_EOK)
-		{
-			if (status & EVENT_HID2UART) {
-				remove_mem(TYPE_HID2UART, &hid);
-				if (hid != RT_NULL) {
-					rt_memcpy(uart_tx_buf, hid, 64);
-					uart_dma_tx_open();
-				}
-			}
-
-			if (status & EVENT_UART2HID) {
-				remove_mem(TYPE_UART2HID, &uart);
-				if (uart != RT_NULL && hid_sent) {
-					hid_sent = RT_FALSE;
-					USBD_HID_SendReport (&USB_Device_dev,
-							uart, 64);
-					//uart_recover();
-				}
-			}
-			led_blink();
-		}
+		rt_sem_take(&sof_sem, RT_WAITING_FOREVER);
+		dump_imu(imu, sof_timer);
+		//if (hid_sent) {
+			hid_sent = RT_FALSE;
+			USBD_HID_SendReport (&USB_Device_dev, imu, 19);
+		//}
+		led_blink();
 	}
 }
 

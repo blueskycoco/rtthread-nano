@@ -22,39 +22,16 @@ int main(int argc, void* argv[])
 		printf("open usb failed\r\n");
 		return 0;
 	}
-	if (send == 1) {
-		for (i=33; i<=126; i++) {
-			memset(cmd, i, 64);
-			cmd[62] = '\r';
-			cmd[63] = '\n';
-			hid_xfer(handle, 0x01, cmd, 64, 1000);
-		}
-	} else {
-		i = 33;
-		while(1) {
-			len = hid_xfer(handle, 0x81, rsp, 64, 1000);
-			if (len > 0) {
-				all_len += len;
-				//printf("all_rcv %d\r\n", all_len);
-				for(j=0; j<len; j++)
-					printf("%c", rsp[j]);
-				//printf(" %d\r\n", sizeof(cmd));
-			}
-#if 0
-			memset(cmd, 0x33, 64);
-			cmd[62] = '\r';
-			cmd[63] = '\n';
-#endif
-			memset(cmd, i, 64);
-			cmd[62] = '\r';
-			cmd[63] = '\n';
-			rcv_len = hid_xfer(handle, 0x01, cmd, 64, 1000);
-			all_rcv += rcv_len;
-			i++;
-			if (i == 127)
-				i = 33;
-			//printf("all_send %d\r\n", all_rcv);
-		}
+	while(1) {
+		len = hid_xfer(handle, 0x81, rsp, 64, 1000);
+		if (len > 0) {
+			all_len += len;
+			printf("all_rcv %d\t", all_len);
+			for(j=0; j<len; j++)
+				printf("%02x\t", rsp[j]);
+			printf("\r\n");
+		} else
+			printf("no data\r\n");
 	}
 	close_usb(handle, 0);
 
