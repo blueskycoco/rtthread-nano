@@ -73,9 +73,10 @@ int main(void)
 	{
 		rt_sem_take(&sof_sem, RT_WAITING_FOREVER);
 		dump_imu(imu, sof_timer);
+		get_ts(imu+15);
 		//if (hid_sent) {
 			hid_sent = RT_FALSE;
-			USBD_HID_SendReport (&USB_Device_dev, imu, 19);
+			USBD_HID_SendReport (&USB_Device_dev, imu, 23);
 		//}
 		led_blink();
 	}

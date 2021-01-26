@@ -20,6 +20,14 @@ extern void SystemCoreClockUpdate(void);
 // Holds the system core clock, which is the system clock 
 // frequency supplied to the SysTick timer and the processor 
 // core clock.
+typedef struct _int64_data {
+        union {
+                uint64_t m_int64;
+                uint8_t m_bytes[sizeof(uint64_t)];
+        };
+} int64_val;
+int64_val g_ts;
+uint64_t g_ts_64 = 0;
 extern uint32_t SystemCoreClock;
 uint8_t uart_tx_buf[64] = {0};
 uint8_t uart_rx_buf[64] = {0};
@@ -68,6 +76,46 @@ void SysTick_Handler(void)
 	/* leave interrupt */
 	rt_interrupt_leave();
 }
+
+void TIM2_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM2, TIM_IT_CC1) != RESET)
+	{
+		TIM_ClearITPendingBit(TIM2, TIM_IT_CC1);
+		g_ts_64++;
+		//TIM_SetCompare1(TIM2, 65534);
+		//TIM_Cmd(TIM2, ENABLE);
+	}
+}
+void get_ts(uint8_t *buf)
+{
+	g_ts.m_int64 = g_ts_64*65535 + TIM_GetCounter(TIM2);
+	rt_memcpy(buf, g_ts.m_bytes, 8);
+}
+static int timer_init(void)
+{
+	NVIC_InitTypeDef NVIC_InitStructure;
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+	
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	TIM_TimeBaseStructure.TIM_Period = 65535;
+	TIM_TimeBaseStructure.TIM_Prescaler = 47;
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+
+	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
+	TIM_SelectOnePulseMode(TIM2, TIM_OPMode_Repetitive);
+	TIM_SetCompare1(TIM2, 65535);
+	TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE); 
+	TIM_Cmd(TIM2, ENABLE);
+
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	return 0;
+}
+INIT_BOARD_EXPORT(timer_init);
 static void uart_dma_config()
 {
 	DMA_InitTypeDef  DMA_InitStructure;

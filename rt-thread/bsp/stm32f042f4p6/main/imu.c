@@ -326,11 +326,6 @@ void dump_imu(uint8_t *imu, uint32_t ts)
 #else
 	inv_serif_read_burst(0x1d, imu+1, 14);
 #endif
-	/* ts */
-	imu[15] = (ts >> 24) & 0xff;
-	imu[16] = (ts >> 16) & 0xff;
-	imu[17] = (ts >> 8) & 0xff;
-	imu[18] = (ts >> 0) & 0xff;
 #endif
 	return 0;
 }

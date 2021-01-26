@@ -44,6 +44,7 @@ extern void USB_IRQHandler(void);
 extern void EXTI0_1_IRQHandler(void);
 extern void DMA1_Channel4_5_IRQHandler(void);
 extern void SPI1_IRQHandler(void);
+extern void TIM2_IRQHandler(void);
 //*****************************************************************************
 //
 // External declaration for the interrupt handler used by the application.
@@ -104,7 +105,7 @@ void (* const g_pfnVectors[])(void) =
 	IntDefaultHandler,    //	ADC1_IRQHandler
 	IntDefaultHandler,    //	TIM1_BRK_IRQHandler
 	IntDefaultHandler,    //	TIM1_CC_IRQHandler
-	IntDefaultHandler,	//	TIM2_IRQHandler    
+	TIM2_IRQHandler,	//	TIM2_IRQHandler    
 	IntDefaultHandler,    //	TIM3_IRQHandler
 	0,    
 	0,    
