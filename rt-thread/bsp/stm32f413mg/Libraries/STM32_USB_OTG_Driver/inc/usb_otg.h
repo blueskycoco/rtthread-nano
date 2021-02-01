@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    usbd_conf.h
+  * @file    usb_otg.h
   * @author  MCD Application Team
-  * @version V1.2.1
+  * @version V2.2.1
   * @date    17-March-2018
-  * @brief   USB Device configuration file
+  * @brief   OTG Core Header
   ******************************************************************************
   * @attention
   *
@@ -20,46 +20,36 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __USBD_CONF__H__
-#define __USBD_CONF__H__
+#ifndef __USB_OTG__
+#define __USB_OTG__
 
-/* Includes ------------------------------------------------------------------*/
-#include "usb_conf.h"
 
-/** @defgroup USB_CONF_Exported_Defines
+/** @addtogroup USB_OTG_DRIVER
+  * @{
+  */
+  
+/** @defgroup USB_OTG
+  * @brief This file is the 
   * @{
   */ 
 
 
-#define USBD_CFG_MAX_NUM           1
-#define USBD_ITF_MAX_NUM           1
-
-#define USB_MAX_STR_DESC_SIZ       64 
-
-#define USBD_SELF_POWERED               
-
-
-
-#define USBD_DYNAMIC_DESCRIPTOR_CHANGE_ENABLED 
-
-/** @defgroup USB_String_Descriptors
+/** @defgroup USB_OTG_Exported_Defines
   * @{
   */ 
 
 
-/** @defgroup USB_HID_Class_Layer_Parameter
-  * @{
-  */ 
-#define HID_IN_EP                    0x81
-#define HID_OUT_EP                   0x01
-
-#define HID_IN_PACKET                2
-#define HID_OUT_PACKET               2
+void USB_OTG_InitiateSRP(void);
+void USB_OTG_InitiateHNP(uint8_t state , uint8_t mode);
+void USB_OTG_Switchback (USB_OTG_CORE_DEVICE *pdev);
+uint32_t  USB_OTG_GetCurrentState (USB_OTG_CORE_DEVICE *pdev);
 
 /**
   * @}
   */ 
-/** @defgroup USB_CONF_Exported_Types
+
+
+/** @defgroup USB_OTG_Exported_Types
   * @{
   */ 
 /**
@@ -67,21 +57,21 @@
   */ 
 
 
-/** @defgroup USB_CONF_Exported_Macros
+/** @defgroup USB_OTG_Exported_Macros
   * @{
   */ 
 /**
   * @}
   */ 
 
-/** @defgroup USB_CONF_Exported_Variables
+/** @defgroup USB_OTG_Exported_Variables
   * @{
   */ 
 /**
   * @}
   */ 
 
-/** @defgroup USB_CONF_Exported_FunctionsPrototype
+/** @defgroup USB_OTG_Exported_FunctionsPrototype
   * @{
   */ 
 /**
@@ -89,7 +79,15 @@
   */ 
 
 
-#endif /* __USBD_CONF__H__ */
+#endif //__USB_OTG__
 
+
+/**
+  * @}
+  */ 
+
+/**
+  * @}
+  */ 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
