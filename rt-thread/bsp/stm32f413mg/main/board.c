@@ -18,11 +18,14 @@
 #include "mcu_cmd.h"
 #include "utils.h"
 #include "mem_list.h"
+#include "usbd_customhid_core.h"
 
 extern struct rt_semaphore ota_sem;
 extern rt_bool_t ota_mode;
 extern void SystemCoreClockUpdate(void);
 extern uint32_t SystemCoreClock;
+extern USB_OTG_CORE_HANDLE USB_OTG_dev;
+extern uint32_t USBD_OTG_ISR_Handler(USB_OTG_CORE_HANDLE * pdev);
 #if defined(RT_USING_USER_MAIN) && defined(RT_USING_HEAP)
 #define RT_HEAP_SIZE 10*1024
 static uint32_t rt_heap[RT_HEAP_SIZE];	// heap default size: 6K(1536 * 4)
@@ -67,6 +70,11 @@ void SysTick_Handler(void)
 
 	/* leave interrupt */
 	rt_interrupt_leave();
+}
+
+void OTG_FS_IRQHandler(void)
+{
+  USBD_OTG_ISR_Handler(&USB_OTG_dev);
 }
 
 static int uart_init(void)

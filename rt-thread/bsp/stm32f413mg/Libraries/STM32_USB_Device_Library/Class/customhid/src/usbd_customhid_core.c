@@ -539,7 +539,7 @@ static uint8_t  USBD_CUSTOM_HID_DataIn (void  *pdev,
   be caused by  a new transfer before the end of the previous transfer */
   DCD_EP_Flush(pdev, HID_IN_EP);
   
-  if (epnum == 1) PrevXferDone = 1;
+  //if (epnum == 1) PrevXferDone = 1;
   
   return USBD_OK;
 }
@@ -558,65 +558,6 @@ uint8_t  USBD_CUSTOM_HID_DataOut (void  *pdev,
   BitAction Led_State;
   if (epnum == 1) 
   {
-    if (Report_buf[1] == 0)
-    {
-      Led_State = Bit_RESET;
-    }
-    else 
-    {
-      Led_State = Bit_SET;
-    }
-    
-    switch (Report_buf[0])
-    {
-    case 1: /* Led 1 */
-      if (Led_State != Bit_RESET)
-      {
-        STM_EVAL_LEDOn(LED1);
-      }
-      else
-      {
-        STM_EVAL_LEDOff(LED1);
-      }
-      break;
-      
-    case 2: /* Led 2 */
-      if (Led_State != Bit_RESET)
-      {
-        STM_EVAL_LEDOn(LED2);
-      }
-      else
-      {
-        STM_EVAL_LEDOff(LED2);
-      }
-      break;
-    case 3: /* Led 3 */
-      if (Led_State != Bit_RESET)
-      {
-        STM_EVAL_LEDOn(LED3);
-      }
-      else
-      {
-        STM_EVAL_LEDOff(LED3);
-      }
-      break;
-    case 4: /* Led 4 */
-      if (Led_State != Bit_RESET)
-      {
-        STM_EVAL_LEDOn(LED4);
-      }
-      else
-      {
-        STM_EVAL_LEDOff(LED4);
-      }
-      break;
-    default:
-      STM_EVAL_LEDOff(LED1);
-      STM_EVAL_LEDOff(LED2);
-      STM_EVAL_LEDOff(LED3);
-      STM_EVAL_LEDOff(LED4); 
-      break;
-    }
   }
   
   DCD_EP_PrepareRx(pdev,HID_IN_EP,Report_buf,2);
@@ -639,65 +580,6 @@ uint8_t USBD_CUSTOM_HID_EP0_RxReady(void *pdev)
   if (IsReportAvailable == 1)
   {
     IsReportAvailable = 0;
-    if (Report_buf[1] == 0)
-    {
-      Led_State = Bit_RESET;
-    }
-    else 
-    {
-      Led_State = Bit_SET;
-    }
-    
-    switch (Report_buf[0])
-    {
-    case 1: /* Led 1 */
-      if (Led_State != Bit_RESET)
-      {
-        STM_EVAL_LEDOn(LED1);
-      }
-      else
-      {
-        STM_EVAL_LEDOff(LED1);
-      }
-      break;
-      
-    case 2: /* Led 2 */
-      if (Led_State != Bit_RESET)
-      {
-        STM_EVAL_LEDOn(LED2);
-      }
-      else
-      {
-        STM_EVAL_LEDOff(LED2);
-      }
-      break;
-    case 3: /* Led 3 */
-      if (Led_State != Bit_RESET)
-      {
-        STM_EVAL_LEDOn(LED3);
-      }
-      else
-      {
-        STM_EVAL_LEDOff(LED3);
-      }
-      break;
-    case 4: /* Led 4 */
-      if (Led_State != Bit_RESET)
-      {
-        STM_EVAL_LEDOn(LED4);
-      }
-      else
-      {
-        STM_EVAL_LEDOff(LED4);
-      }
-      break;
-    default:
-      STM_EVAL_LEDOff(LED1);
-      STM_EVAL_LEDOff(LED2);
-      STM_EVAL_LEDOff(LED3);
-      STM_EVAL_LEDOff(LED4); 
-      break;
-    }
   }
   return USBD_OK;
 }

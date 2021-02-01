@@ -15,6 +15,11 @@
 #include "boot.h"
 #include "utils.h"
 #include "mcu.h"
+#include  "usbd_customhid_core.h"
+#include  "usbd_usr.h"
+#include  "usbd_desc.h"
+
+USB_OTG_CORE_HANDLE USB_OTG_dev;
 
 void led_init()
 {
@@ -33,7 +38,12 @@ void led_init()
 int main(void)
 {
 	uint8_t flag = 0;
+
 	led_init();
+
+	USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID,
+            &USR_desc, &USBD_CUSTOMHID_cb, &USR_cb);
+
 #if 0
 	if (warm_boot()) {
 		protocol_init();

@@ -45,9 +45,13 @@ IPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Include
 IPATH += ./Libraries/STM32F4xx_StdPeriph_Driver/inc
 IPATH += ../../include
 IPATH += ../../components/finsh
+IPATH += ./Libraries/STM32_USB_Device_Library/Class/customhid/inc
+IPATH += ./Libraries/STM32_USB_Device_Library/Core/inc
+IPATH += ./Libraries/STM32_USB_OTG_Driver/inc
 
 VPATH = .
 VPATH += ./main
+VPATH += ./usb
 VPATH += ./main/driver
 VPATH += ./main/utils
 VPATH += ./Libraries/STM32F4xx_StdPeriph_Driver/src
@@ -57,6 +61,9 @@ VPATH += ./libraries
 VPATH += ../../src
 VPATH += ../../components/finsh
 VPATH += ../../libcpu/arm/cortex-m4
+VPATH += ./Libraries/STM32_USB_OTG_Driver/src
+VPATH += ./Libraries/STM32_USB_Device_Library/Class/customhid/src
+VPATH += ./Libraries/STM32_USB_Device_Library/Core/src
 #
 # The default rule, which causes the ${VER} example to be built.
 #
@@ -94,6 +101,16 @@ ${COMPILER}/${VER}.axf: ${COMPILER}/rc4.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/crc.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/utils.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/flash_if.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usb_bsp.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_desc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_usr.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_customhid_core.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_core.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_ioreq.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_req.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usb_core.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usb_dcd.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usb_dcd_int.o
 #${COMPILER}/${VER}.axf: ${COMPILER}/stm32_it.o
 #driver
 ${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_gpio.o
@@ -160,7 +177,7 @@ ${COMPILER}/${VER}.axf: ${COMPILER}/shell.o
 ${COMPILER}/${VER}.axf: rtthread.ld
 SCATTERgcc_${VER}=rtthread.ld
 ENTRY_${VER}=Reset_Handler
-CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F413_423xx -DFW_VERSION=\"${VER}\"
+CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F413_423xx -DFW_VERSION=\"${VER}\" -DUSE_USB_OTG_FS
 #
 # Include the automatically generated dependency files.
 #

@@ -24,28 +24,7 @@
 #define __USB_CONF__H__
 
 /* Includes ------------------------------------------------------------------*/
-#if defined (USE_STM322xG_EVAL)
- #include "stm322xg_eval.h"
- #include "stm322xg_eval_lcd.h"
-#elif defined(USE_STM324xG_EVAL)
- #include "stm32f4xx.h"
- #include "stm324xg_eval.h" 
- #include "stm324xg_eval_lcd.h"
-
-#elif defined(USE_STM324x9I_EVAL)
- #include "stm32f4xx.h"
- #include "stm324x9i_eval.h" 
- #include "stm324x9i_eval_lcd.h"
-
-#elif defined (USE_STM3210C_EVAL)
- #include "stm32f10x.h"
- #include "stm3210c_eval.h" 
- #include "stm3210c_eval_lcd.h"
-
-#else
- #error "Missing define: Evaluation board (ie. USE_STM322xG_EVAL)"
-#endif
-#include "bsp_config.h"
+#include "stm32f4xx.h"
 
 /** @addtogroup USB_OTG_DRIVER
   * @{

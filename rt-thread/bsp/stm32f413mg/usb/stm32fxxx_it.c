@@ -141,73 +141,6 @@ void PendSV_Handler(void)
 }
 
 /**
-* @brief  This function handles SysTick Handler.
-* @param  None
-* @retval None
-*/
-void SysTick_Handler(void)
-{
-}
-
-/**
-* @brief  This function handles EXTI15_10_IRQ Handler.
-* @param  None
-* @retval None
-*/
-#ifdef USE_STM3210C_EVAL
-void EXTI9_5_IRQHandler(void)
-#else
-void EXTI15_10_IRQHandler(void)
-#endif
-{
-  if (EXTI_GetITStatus(KEY_BUTTON_EXTI_LINE) != RESET)
-  {
-    /* Clear the EXTI line pending bit */
-    EXTI_ClearITPendingBit(KEY_BUTTON_EXTI_LINE);
-
-    if ((PrevXferDone) && (USB_OTG_dev.dev.device_status == USB_OTG_CONFIGURED))
-    {
-      Send_Buffer[0] = KEY_REPORT_ID;
-
-      if (STM_EVAL_PBGetState(BUTTON_KEY) == Bit_RESET)
-      {
-        Send_Buffer[1] = 0x01;
-      }
-      else
-      {
-        Send_Buffer[1] = 0x00;
-      }
-
-      USBD_CUSTOM_HID_SendReport(&USB_OTG_dev, Send_Buffer, 2);
-      PrevXferDone = 0;
-    }
-  }
-}
-
-/**
-  * @brief  This function handles ADCx DMA IRQHandler Handler.
-  * @param  None
-  * @retval None
-  */
-void ADCx_DMA_IRQHandler(void)
-{
-  Send_Buffer[0] = 0x07;
-
-  if ((ADC_ConvertedValueX >> 4) - (ADC_ConvertedValueX_1 >> 4) > 4)
-  {
-    if ((PrevXferDone) && (USB_OTG_dev.dev.device_status == USB_OTG_CONFIGURED))
-    {
-      Send_Buffer[1] = (uint8_t) (ADC_ConvertedValueX >> 4);
-
-      USBD_CUSTOM_HID_SendReport(&USB_OTG_dev, Send_Buffer, 2);
-
-      ADC_ConvertedValueX_1 = ADC_ConvertedValueX;
-      PrevXferDone = 0;
-    }
-  }
-}
-
-/**
 * @brief  This function handles OTG_HS Handler.
 * @param  None
 * @retval None
@@ -220,28 +153,6 @@ void OTG_FS_IRQHandler(void)
 {
   USBD_OTG_ISR_Handler(&USB_OTG_dev);
 }
-
-#ifdef USB_OTG_HS_DEDICATED_EP1_ENABLED
-/**
-* @brief  This function handles EP1_IN Handler.
-* @param  None
-* @retval None
-*/
-void OTG_HS_EP1_IN_IRQHandler(void)
-{
-  USBD_OTG_EP1IN_ISR_Handler(&USB_OTG_dev);
-}
-
-/**
-* @brief  This function handles EP1_OUT Handler.
-* @param  None
-* @retval None
-*/
-void OTG_HS_EP1_OUT_IRQHandler(void)
-{
-  USBD_OTG_EP1OUT_ISR_Handler(&USB_OTG_dev);
-}
-#endif
 
 /******************************************************************************/
 /* STM32Fxxx Peripherals Interrupt Handlers */
