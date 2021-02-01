@@ -229,10 +229,10 @@ Reset_Handler(void)
 	//
 	// Zero fill the bss segment.
 	//
-	//for(pui32Dest = &_sbss; pui32Dest < &_ebss; )
-	//{
-	//	*pui32Dest++ = 0;
-	//}
+	for(pui32Dest = &_sbss; pui32Dest < &_ebss; )
+	{
+		*pui32Dest++ = 0;
+	}
 
 	//
 	// Call the application's entry point.

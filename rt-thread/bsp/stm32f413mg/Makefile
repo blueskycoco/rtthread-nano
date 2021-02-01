@@ -81,7 +81,7 @@ ${COMPILER}:
 # Rules for building the ${VER} example.
 #
 #init
-${COMPILER}/${VER}.axf: ${COMPILER}/startup_stm32f413xx.o
+${COMPILER}/${VER}.axf: ${COMPILER}/startup_stm32f446xx.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/system_stm32f4xx.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/main.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/board.o
