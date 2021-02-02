@@ -9,60 +9,30 @@
  */
 
 #include <rtthread.h>
-#include <stm32f4xx.h>
 #include "md5.h"
 #include "ymodem.h"
 #include "boot.h"
 #include "utils.h"
 #include "mcu.h"
-#include  "usbd_customhid_core.h"
-#include  "usbd_usr.h"
-#include  "usbd_desc.h"
+#include "stm32f4xx_hal.h"
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_hid.h" 
 
-__ALIGN_BEGIN USB_OTG_CORE_HANDLE USB_OTG_dev __ALIGN_END;
-
-void led_init()
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
-
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-}
+USBD_HandleTypeDef USBD_Device;
+extern PCD_HandleTypeDef hpcd;
 
 int main(void)
 {
 	uint8_t flag = 0;
 
-	led_init();
+	USBD_Init(&USBD_Device, &HID_Desc, 0);
+  	USBD_RegisterClass(&USBD_Device, USBD_HID_CLASS);
+  	USBD_Start(&USBD_Device);
 
-	USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID,
-            &USR_desc, &USBD_CUSTOMHID_cb, &USR_cb);
-
-#if 0
-	if (warm_boot()) {
-		protocol_init();
-	} else {
-		verify_and_jump();
-		protocol_init();
-	}
-#endif
 	while (1)
 	{
-		if (flag == 1) {
-			GPIO_ResetBits(GPIOB,GPIO_Pin_0);
-			flag = 0;
-			rt_thread_mdelay(1000);
-		} else {
-			GPIO_SetBits(GPIOB,GPIO_Pin_0);
-			flag = 1;
-			rt_thread_mdelay(1000);
-		}
+		rt_thread_mdelay(1000);
 	}
 }
 

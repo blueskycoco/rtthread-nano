@@ -9,6 +9,7 @@ extern uint8_t uart_rx_buf[64];
 extern uint8_t uart_tx_buf[64];
 rt_bool_t warm_boot()
 {
+#if 0
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 	PWR_BackupAccessCmd(ENABLE);
 
@@ -17,22 +18,22 @@ rt_bool_t warm_boot()
 	PWR_BackupAccessCmd(DISABLE);
 	if (flag == TYPE_WARM_BOOT)
 		return RT_TRUE;
-
+#endif
 	return RT_FALSE;
 }
 
 void uart_tx_set()
 {
-	DMA_Cmd(DMA2_Stream6, DISABLE);
-	DMA_SetCurrDataCounter(DMA2_Stream6, 64);
-	DMA_Cmd(DMA2_Stream6, ENABLE);
+//	DMA_Cmd(DMA2_Stream6, DISABLE);
+//	DMA_SetCurrDataCounter(DMA2_Stream6, 64);
+//	DMA_Cmd(DMA2_Stream6, ENABLE);
 }
 
 void uart_rx_set()
 {
-	DMA_Cmd(DMA2_Stream1, DISABLE);
-	DMA_SetCurrDataCounter(DMA2_Stream1, 64);
-	DMA_Cmd(DMA2_Stream1, ENABLE);
+//	DMA_Cmd(DMA2_Stream1, DISABLE);
+//	DMA_SetCurrDataCounter(DMA2_Stream1, 64);
+//	DMA_Cmd(DMA2_Stream1, ENABLE);
 }
 
 void read_ts_64(uint8_t *ts)

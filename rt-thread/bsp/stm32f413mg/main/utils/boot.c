@@ -13,6 +13,7 @@ jump_app jump;
 static void app_boot()
 {
         rt_hw_interrupt_disable();
+#if 0
 	if (((*(__IO uint32_t*)(APP_ADDRESS + 4)) & 0xFF000000 ) == 0x08000000)
 	{
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
@@ -25,6 +26,7 @@ static void app_boot()
 		__set_MSP(*(__IO uint32_t*) APP_ADDRESS);
 		jump();
 	}
+#endif
 }
 
 void verify_and_jump()

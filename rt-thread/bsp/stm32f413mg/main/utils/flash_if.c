@@ -42,11 +42,13 @@ static uint32_t GetSector(uint32_t Address);
   */
 void FLASH_If_Init(void)
 { 
-  FLASH_Unlock(); 
+#if 0
+  	FLASH_Unlock(); 
 
   /* Clear pending flags (if any) */  
   FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | 
                   FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR|FLASH_FLAG_PGSERR);
+#endif
 }
 
 /**
@@ -57,7 +59,7 @@ void FLASH_If_Init(void)
   */
 uint32_t FLASH_If_Erase(uint32_t StartSector, uint32_t EndSector)
 {
-  uint32_t UserStartSector = FLASH_Sector_1, i = 0, UserEndSector;
+  uint32_t UserStartSector, i = 0, UserEndSector;
 
   /* Get the sector where start the user flash area */
   UserStartSector = GetSector(StartSector);
@@ -67,7 +69,7 @@ uint32_t FLASH_If_Erase(uint32_t StartSector, uint32_t EndSector)
   {
     /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
        be done by word */ 
-    if (FLASH_EraseSector(i, VoltageRange_3) != FLASH_COMPLETE)
+    //if (FLASH_EraseSector(i, VoltageRange_3) != FLASH_COMPLETE)
     {
       /* Error occurred while page erase */
       return (1);
@@ -95,7 +97,8 @@ uint32_t FLASH_If_Write(uint32_t FlashAddress, uint32_t* Data ,uint32_t DataLeng
   {
 	/* Device voltage range supposed to be [2.7V to 3.6V], the operation will
        be done by word */ 
-    if (FLASH_ProgramWord(addr, *(uint32_t*)(Data+i)) == FLASH_COMPLETE)
+#if 0
+    	  if (FLASH_ProgramWord(addr, *(uint32_t*)(Data+i)) == FLASH_COMPLETE)
     {
      /* Check the written value */
       if (*(__IO uint32_t*)addr != *(uint32_t*)(Data+i))
@@ -113,6 +116,7 @@ uint32_t FLASH_If_Write(uint32_t FlashAddress, uint32_t* Data ,uint32_t DataLeng
       /* Error occurred while writing data in Flash memory */
       return (1);
     }
+#endif
   }
 
   return (0);
@@ -126,17 +130,18 @@ uint32_t FLASH_If_Write(uint32_t FlashAddress, uint32_t* Data ,uint32_t DataLeng
   */
 uint16_t FLASH_If_GetWriteProtectionStatus(uint32_t addr)
 {
-  uint32_t UserStartSector = FLASH_Sector_1;
+  uint32_t UserStartSector;
 
   /* Get the sector where start the user flash area */
   UserStartSector = GetSector(addr);
-
+#if 0
   /* Check if there are write protected sectors inside the user flash area */
   if ((FLASH_OB_GetWRP() >> (UserStartSector/8)) == (0xFFF >> (UserStartSector/8)))
   { /* No write protected sectors inside the user flash area */
     return 1;
   }
   else
+#endif
   { /* Some sectors inside the user flash area are write protected */
     return 0;
   }
@@ -150,7 +155,8 @@ uint16_t FLASH_If_GetWriteProtectionStatus(uint32_t addr)
   */
 uint32_t FLASH_If_DisableWriteProtection(uint32_t addr)
 {
-  __IO uint32_t UserStartSector = FLASH_Sector_1, UserWrpSectors = OB_WRP_Sector_1;
+#if 0
+  	__IO uint32_t UserStartSector = FLASH_Sector_1, UserWrpSectors = OB_WRP_Sector_1;
 
   /* Get the sector where start the user flash area */
   UserStartSector = GetSector(addr);
@@ -170,7 +176,7 @@ uint32_t FLASH_If_DisableWriteProtection(uint32_t addr)
     /* Error: Flash write unprotection failed */
     return (2);
   }
-
+#endif
   /* Write Protection successfully disabled */
   return (1);
 }
@@ -183,7 +189,7 @@ uint32_t FLASH_If_DisableWriteProtection(uint32_t addr)
 static uint32_t GetSector(uint32_t Address)
 {
   uint32_t sector = 0;
-  
+#if 0 
   if((Address < ADDR_FLASH_SECTOR_1) && (Address >= ADDR_FLASH_SECTOR_0))
   {
     sector = FLASH_Sector_0;  
@@ -232,6 +238,7 @@ static uint32_t GetSector(uint32_t Address)
   {
     sector = FLASH_Sector_11;  
   }
+#endif
     return sector;
 }
 

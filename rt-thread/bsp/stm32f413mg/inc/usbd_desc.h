@@ -1,128 +1,65 @@
 /**
   ******************************************************************************
-  * @file    usbd_desc.h
+  * @file    USB_Device/HID_Standalone/Inc/usbd_desc.h
   * @author  MCD Application Team
-  * @version V1.2.1
-  * @date    17-March-2018
-  * @brief   header file for the usbd_desc.c file
+  * @brief   Header for usbd_desc.c module
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2015 STMicroelectronics.
+  * <h2><center>&copy; Copyright © 2017 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                      <http://www.st.com/SLA0044>
+  * Redistribution and use in source and binary forms, with or without 
+  * modification, are permitted, provided that the following conditions are met:
+  *
+  * 1. Redistribution of source code must retain the above copyright notice, 
+  *    this list of conditions and the following disclaimer.
+  * 2. Redistributions in binary form must reproduce the above copyright notice,
+  *    this list of conditions and the following disclaimer in the documentation
+  *    and/or other materials provided with the distribution.
+  * 3. Neither the name of STMicroelectronics nor the names of other 
+  *    contributors to this software may be used to endorse or promote products 
+  *    derived from this software without specific written permission.
+  * 4. This software, including modifications and/or derivative works of this 
+  *    software, must execute solely and exclusively on microcontroller or
+  *    microprocessor devices manufactured by or for STMicroelectronics.
+  * 5. Redistribution and use of this software other than as permitted under 
+  *    this license is void and will automatically terminate your rights under 
+  *    this license. 
+  *
+  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS" 
+  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT 
+  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
+  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT 
+  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
+  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
+  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */ 
-
+  */
 /* Define to prevent recursive inclusion -------------------------------------*/
-
-#ifndef __USB_DESC_H
-#define __USB_DESC_H
+#ifndef __USBD_DESC_H
+#define __USBD_DESC_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "usbd_req.h"
+#include "usbd_def.h"
 
-/** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-  * @{
-  */
-  
-/** @defgroup USB_DESC
-  * @brief general defines for the usb device library file
-  * @{
-  */ 
-
-/** @defgroup USB_DESC_Exported_Defines
-  * @{
-  */
-#define USB_DEVICE_DESCRIPTOR_TYPE              0x01
-#define USB_CONFIGURATION_DESCRIPTOR_TYPE       0x02
-#define USB_STRING_DESCRIPTOR_TYPE              0x03
-#define USB_INTERFACE_DESCRIPTOR_TYPE           0x04
-#define USB_ENDPOINT_DESCRIPTOR_TYPE            0x05
-#define USB_SIZ_DEVICE_DESC                     18
-#define USB_SIZ_STRING_LANGID                   4
-
-
-#if !defined (USE_STM3210C_EVAL)
+/* Exported types ------------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
 #define         DEVICE_ID1          (0x1FFF7A10)
 #define         DEVICE_ID2          (0x1FFF7A14)
 #define         DEVICE_ID3          (0x1FFF7A18)
 
-#else
-#define         DEVICE_ID1          (0x1FFFF7E8)
-#define         DEVICE_ID2          (0x1FFFF7EA)
-#define         DEVICE_ID3          (0x1FFFF7EC)  
-#endif
-
 #define  USB_SIZ_STRING_SERIAL       0x1A
-
-/**
-  * @}
-  */ 
-
-
-/** @defgroup USBD_DESC_Exported_TypesDefinitions
-  * @{
-  */
-/**
-  * @}
-  */ 
-
-
-
-/** @defgroup USBD_DESC_Exported_Macros
-  * @{
-  */ 
-/**
-  * @}
-  */ 
-
-/** @defgroup USBD_DESC_Exported_Variables
-  * @{
-  */ 
-extern  uint8_t USBD_DeviceDesc  [USB_SIZ_DEVICE_DESC];
-extern  uint8_t USBD_StrDesc[USB_MAX_STR_DESC_SIZ];
-extern  uint8_t USBD_OtherSpeedCfgDesc[USB_LEN_CFG_DESC]; 
-extern  uint8_t USBD_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC];
-extern  uint8_t USBD_LangIDDesc[USB_SIZ_STRING_LANGID];
-extern  USBD_DEVICE USR_desc; 
-/**
-  * @}
-  */ 
-
-/** @defgroup USBD_DESC_Exported_FunctionsPrototype
-  * @{
-  */ 
-
-
-uint8_t *     USBD_USR_DeviceDescriptor( uint8_t speed , uint16_t *length);
-uint8_t *     USBD_USR_LangIDStrDescriptor( uint8_t speed , uint16_t *length);
-uint8_t *     USBD_USR_ManufacturerStrDescriptor ( uint8_t speed , uint16_t *length);
-uint8_t *     USBD_USR_ProductStrDescriptor ( uint8_t speed , uint16_t *length);
-uint8_t *     USBD_USR_SerialStrDescriptor( uint8_t speed , uint16_t *length);
-uint8_t *     USBD_USR_ConfigStrDescriptor( uint8_t speed , uint16_t *length);
-uint8_t *     USBD_USR_InterfaceStrDescriptor( uint8_t speed , uint16_t *length);
-
-#ifdef USB_SUPPORT_USER_STRING_DESC
-uint8_t *     USBD_USR_USRStringDesc (uint8_t speed, uint8_t idx , uint16_t *length);  
-#endif /* USB_SUPPORT_USER_STRING_DESC */  
-  
-/**
-  * @}
-  */ 
+/* Exported macro ------------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */
+extern USBD_DescriptorsTypeDef HID_Desc;
 
 #endif /* __USBD_DESC_H */
-
-/**
-  * @}
-  */ 
-
-/**
-* @}
-*/ 
+ 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

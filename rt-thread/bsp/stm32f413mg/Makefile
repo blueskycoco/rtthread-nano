@@ -40,30 +40,32 @@ IPATH = ./main
 IPATH += ./main/driver
 IPATH += ./main/utils
 IPATH += ./inc
-IPATH += ./Libraries/CMSIS/Include
-IPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Include
-IPATH += ./Libraries/STM32F4xx_StdPeriph_Driver/inc
+IPATH += ./hal/CMSIS/Include
+IPATH += ./hal/CMSIS/Device/ST/STM32F4xx/Include
+IPATH += ./hal/STM32F4xx_HAL_Driver/Inc
+IPATH += ./hal/STM32F4xx_HAL_Driver/Inc/Legacy
+IPATH += ./inc
 IPATH += ../../include
 IPATH += ../../components/finsh
-IPATH += ./Libraries/STM32_USB_Device_Library/Class/customhid/inc
-IPATH += ./Libraries/STM32_USB_Device_Library/Core/inc
-IPATH += ./Libraries/STM32_USB_OTG_Driver/inc
+IPATH += ./hal/STM32_USB_Device_Library/Class/CustomHID/Inc
+IPATH += ./hal/STM32_USB_Device_Library/Class/HID/Inc
+IPATH += ./hal/STM32_USB_Device_Library/Core/Inc
 
 VPATH = .
 VPATH += ./main
 VPATH += ./usb
 VPATH += ./main/driver
 VPATH += ./main/utils
-VPATH += ./Libraries/STM32F4xx_StdPeriph_Driver/src
-VPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates
-VPATH += ./Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7
-VPATH += ./libraries
+VPATH += ./hal/STM32F4xx_HAL_Driver/Src
+VPATH += ./hal/STM32F4xx_HAL_Driver/Src/Legacy
+VPATH += ./hal/CMSIS/Device/ST/STM32F4xx/Source/Templates
+VPATH += ./hal/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7
 VPATH += ../../src
 VPATH += ../../components/finsh
 VPATH += ../../libcpu/arm/cortex-m4
-VPATH += ./Libraries/STM32_USB_OTG_Driver/src
-VPATH += ./Libraries/STM32_USB_Device_Library/Class/customhid/src
-VPATH += ./Libraries/STM32_USB_Device_Library/Core/src
+VPATH += ./hal/STM32_USB_Device_Library/Class/CustomHID/Src
+VPATH += ./hal/STM32_USB_Device_Library/Class/HID/Src
+VPATH += ./hal/STM32_USB_Device_Library/Core/Src
 #
 # The default rule, which causes the ${VER} example to be built.
 #
@@ -101,59 +103,101 @@ ${COMPILER}/${VER}.axf: ${COMPILER}/rc4.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/crc.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/utils.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/flash_if.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usb_bsp.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usbd_desc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usbd_usr.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usbd_customhid_core.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usbd_core.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_hid.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/usbd_ioreq.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usbd_req.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usb_core.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usb_dcd.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usb_dcd_int.o
-#${COMPILER}/${VER}.axf: ${COMPILER}/stm32_it.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_ctlreq.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_core.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_desc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_conf.o
 #driver
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_gpio.o
-${COMPILER}/${VER}.axf: ${COMPILER}/misc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_adc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_can.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cec.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_crc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dac.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dbgmcu.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dma.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_exti.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_flash.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_i2c.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_iwdg.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_pwr.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_rcc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_rtc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_syscfg.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_spi.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_tim.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_usart.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_wwdg.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cryp.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cryp_aes.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cryp_des.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_cryp_tdes.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dcmi.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dfsdm.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dma2d.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_dsi.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_flash_ramfunc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_fmpi2c.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hash.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hash_md5.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hash_sha1.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_lptim.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ltdc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_qspi.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_rng.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_sai.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_sdio.o
-${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_spdifrx.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_utils.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_usb.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_usart.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_tim.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_spi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_sdmmc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_rtc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_rng.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_rcc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_pwr.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_lptim.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_i2c.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_gpio.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_fsmc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_fmc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_exti.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_dma2d.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_dma.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_dac.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_crc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_adc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_wwdg.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_usart.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_uart.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_tim_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_tim.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_sram.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_spi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_spdifrx.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_smbus.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_smartcard.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_sdram.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_sd.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_sai_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_sai.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_rtc_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_rtc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_rng.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_rcc_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_rcc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_qspi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_pwr_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_pwr.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_pcd_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_pcd.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_pccard.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_nor.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_nand.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_mmc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_ltdc_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_ltdc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_lptim.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_iwdg.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_irda.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_i2s_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_i2s.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_i2c_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_i2c.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_hcd.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_hash_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_hash.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_gpio.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_fmpi2c_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_fmpi2c.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_flash_ramfunc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_flash_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_flash.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_exti.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_eth.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dsi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dma2d.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dma_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dma.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dfsdm.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dcmi_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dcmi.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dac_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_dac.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_cryp_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_cryp.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_crc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_cortex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_cec.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_can.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_adc_ex.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_adc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal.o
+${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_hal_can.o
 #${VER}
 ${COMPILER}/${VER}.axf: ${COMPILER}/clock.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/components.o
@@ -177,7 +221,7 @@ ${COMPILER}/${VER}.axf: ${COMPILER}/shell.o
 ${COMPILER}/${VER}.axf: rtthread.ld
 SCATTERgcc_${VER}=rtthread.ld
 ENTRY_${VER}=Reset_Handler
-CFLAGSgcc=-DUSE_STDPERIPH_DRIVER -DSTM32F413_423xx -DFW_VERSION=\"${VER}\"
+CFLAGSgcc=-DUSE_HAL_DRIVER -DSTM32F413xx -DUSE_USB_FS -DFW_VERSION=\"${VER}\"
 #
 # Include the automatically generated dependency files.
 #

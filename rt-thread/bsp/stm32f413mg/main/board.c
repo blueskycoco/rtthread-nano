@@ -18,14 +18,18 @@
 #include "mcu_cmd.h"
 #include "utils.h"
 #include "mem_list.h"
-#include "usbd_customhid_core.h"
+#include "stm32f4xx_hal.h"
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_hid.h" 
 
+
+extern PCD_HandleTypeDef hpcd;
+extern USBD_HandleTypeDef USBD_Device;
 extern struct rt_semaphore ota_sem;
 extern rt_bool_t ota_mode;
 extern void SystemCoreClockUpdate(void);
 extern uint32_t SystemCoreClock;
-extern USB_OTG_CORE_HANDLE USB_OTG_dev;
-extern uint32_t USBD_OTG_ISR_Handler(USB_OTG_CORE_HANDLE * pdev);
 #if defined(RT_USING_USER_MAIN) && defined(RT_USING_HEAP)
 #define RT_HEAP_SIZE 10*1024
 static uint32_t rt_heap[RT_HEAP_SIZE];	// heap default size: 6K(1536 * 4)
@@ -39,6 +43,57 @@ RT_WEAK void *rt_heap_end_get(void)
 	return rt_heap + RT_HEAP_SIZE;
 }
 #endif
+void SystemClock_Config (void)
+{
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
+  HAL_StatusTypeDef ret = HAL_OK;
+
+  /* Enable Power Control clock */
+  __HAL_RCC_PWR_CLK_ENABLE();
+
+  /* The voltage scaling allows optimizing the power consumption when the device is 
+     clocked below the maximum system frequency, to update the voltage scaling value 
+     regarding system frequency refer to product datasheet.  */
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  /* Enable HSE Oscillator and activate PLL with HSE as source */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLN = 192;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
+  
+  if(ret != HAL_OK)
+  {
+    while(1) {};
+  }
+
+  /* Select PLLSAI output as USB clock source */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_CLK48;
+  PeriphClkInitStruct.Clk48ClockSelection = RCC_CK48CLKSOURCE_PLLQ;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+  
+  /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
+     clocks dividers */
+  RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;  
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;  
+  ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3);
+  if(ret != HAL_OK)
+  {
+    while(1) {};
+  }
+}
 
 /**
  * This function will initial your board.
@@ -46,10 +101,13 @@ RT_WEAK void *rt_heap_end_get(void)
 void rt_hw_board_init()
 {
 	/* System Clock Update */
+	HAL_Init();
+	SystemClock_Config();
 	SystemCoreClockUpdate();
-
 	/* System Tick Configuration */
-	SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
+	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / RT_TICK_PER_SECOND);
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+	NVIC_SetPriority(SysTick_IRQn, 0xFF);
 
 	/* Call components board initial (use INIT_BOARD_EXPORT()) */
 #ifdef RT_USING_COMPONENTS_INIT
@@ -61,11 +119,20 @@ void rt_hw_board_init()
 #endif
 }
 
+uint32_t HAL_GetTick(void)
+{
+    return rt_tick_get() * 1000 / RT_TICK_PER_SECOND;
+}
+void HAL_Delay(__IO uint32_t Delay)
+{
+    rt_thread_mdelay(Delay);
+}
+
 void SysTick_Handler(void)
 {
 	/* enter interrupt */
 	rt_interrupt_enter();
-
+	HAL_IncTick();
 	rt_tick_increase();
 
 	/* leave interrupt */
@@ -74,36 +141,10 @@ void SysTick_Handler(void)
 
 void OTG_FS_IRQHandler(void)
 {
-	USBD_OTG_ISR_Handler(&USB_OTG_dev);
+  HAL_PCD_IRQHandler(&hpcd);
 }
-
 static int uart_init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	USART_InitTypeDef USART_InitStructure;
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource15, GPIO_AF_USART1);
-
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_15;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = 
-		USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	USART_Init(USART1, &USART_InitStructure);
-	
-	USART_Cmd(USART1, ENABLE);
 	return 0;
 }
 
@@ -119,11 +160,11 @@ void rt_hw_console_output(const char *str)
 	{
 		if (*(str + i) == '\n')
 		{
-			USART_SendData(USART1, a);
-			while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
+			//USART_SendData(USART1, a);
+			//while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
 		}
-		USART_SendData(USART1, *(uint8_t *)(str + i));
-		while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
+		//USART_SendData(USART1, *(uint8_t *)(str + i));
+		//while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
 	}
 }
 
@@ -131,7 +172,7 @@ char rt_hw_console_getchar(void)
 {
 	int8_t ch = -1;
 	return 0;
-	if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
-		ch = USART_ReceiveData(USART1) & 0xff;
+	//if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
+	//	ch = USART_ReceiveData(USART1) & 0xff;
 	return ch;
 }
