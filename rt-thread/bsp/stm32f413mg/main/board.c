@@ -74,7 +74,7 @@ void SysTick_Handler(void)
 
 void OTG_FS_IRQHandler(void)
 {
-  USBD_OTG_ISR_Handler(&USB_OTG_dev);
+	USBD_OTG_ISR_Handler(&USB_OTG_dev);
 }
 
 static int uart_init(void)

@@ -51,7 +51,7 @@
 *  when FS core is used.
 *******************************************************************************/
 #ifndef USE_USB_OTG_FS
-/* #define USE_USB_OTG_FS */
+#define USE_USB_OTG_FS
 #endif /* USE_USB_OTG_FS */
 
 #ifdef USE_USB_OTG_FS 
@@ -158,8 +158,8 @@
  #define TX2_FIFO_FS_SIZE                          0
  #define TX3_FIFO_FS_SIZE                          0
 
-/* #define USB_OTG_FS_LOW_PWR_MGMT_SUPPORT */
-/* #define USB_OTG_FS_SOF_OUTPUT_ENABLED */
+#define USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
+#define USB_OTG_FS_SOF_OUTPUT_ENABLED
 #endif
 
 /****************** USB OTG MISC CONFIGURATION ********************************/
