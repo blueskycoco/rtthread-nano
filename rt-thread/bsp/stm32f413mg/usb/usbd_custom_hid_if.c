@@ -243,8 +243,14 @@ static int8_t CustomHID_DeInit(void)
   * @param  state: LED states (ON/OFF)
   */
 static int8_t CustomHID_OutEvent  (uint8_t* event_idx, uint16_t len)
-{ 
-  return (0);
+{
+	int i;
+	for (i=0; i<len; i++) {
+		if (i != 0 && (i % 16) ==0)
+			rt_kprintf("\r\n");
+		rt_kprintf("%02x ", event_idx[i]);
+	}
+	return (0);
 }
 
 /**

@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 #define MY_VID 		0x3318
-#define MY_PID 		0x0003
+#define MY_PID 		0x0004
 #define MY_CONFIG 	1
 #define MY_DEV 		0x0200
 
