@@ -1,12 +1,12 @@
 /**
   ******************************************************************************
-  * @file    USB_Device/HID_Standalone/Inc/usbd_desc.h
+  * @file    USB_Device/CustomHID_Standalone/Inc/usbd_desc.h
   * @author  MCD Application Team
   * @brief   Header for usbd_desc.c module
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright © 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -42,6 +42,7 @@
   *
   ******************************************************************************
   */
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_DESC_H
 #define __USBD_DESC_H

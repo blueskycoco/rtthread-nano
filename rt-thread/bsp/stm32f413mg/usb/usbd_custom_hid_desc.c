@@ -1,12 +1,12 @@
 /**
   ******************************************************************************
-  * @file    USB_Device/HID_Standalone/Src/usbd_desc.c
+  * @file    USB_Device/CustomHID_Standalone/Src/usbd_desc.c
   * @author  MCD Application Team
-  * @brief   This file provides the USBD descriptors and string formatting method.
+  * @brief   This file provides the USBD descriptors and string formating method.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright © 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -49,12 +49,12 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define USBD_VID                      0x0483
-#define USBD_PID                      0x5710
+#define USBD_VID                      0x3318
+#define USBD_PID                      0x0004
 #define USBD_LANGID_STRING            0x409
-#define USBD_MANUFACTURER_STRING      "STMicroelectronics"
-#define USBD_PRODUCT_HS_STRING        "HID Joystick in HS Mode"
-#define USBD_PRODUCT_FS_STRING        "HID Joystick in FS Mode"
+#define USBD_MANUFACTURER_STRING      "Nreal"
+#define USBD_PRODUCT_HS_STRING        "Custome HID in HS Mode"
+#define USBD_PRODUCT_FS_STRING        "Glasses Boot"
 #define USBD_CONFIGURATION_HS_STRING  "HID Config"
 #define USBD_INTERFACE_HS_STRING      "HID Interface"
 #define USBD_CONFIGURATION_FS_STRING  "HID Config"
@@ -88,7 +88,7 @@ USBD_DescriptorsTypeDef HID_Desc = {
 #if defined ( __ICCARM__ ) /*!< IAR Compiler */
   #pragma data_alignment=4   
 #endif
-__ALIGN_BEGIN   uint8_t USBD_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END = {
+__ALIGN_BEGIN uint8_t USBD_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END = {
   0x12,                       /* bLength */
   USB_DESC_TYPE_DEVICE,       /* bDescriptorType */
   0x00,                       /* bcdUSB */
@@ -113,7 +113,7 @@ __ALIGN_BEGIN   uint8_t USBD_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END = {
 #if defined ( __ICCARM__ ) /*!< IAR Compiler */
   #pragma data_alignment=4   
 #endif
-__ALIGN_BEGIN   uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] __ALIGN_END = {
+__ALIGN_BEGIN uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] __ALIGN_END = {
   USB_LEN_LANGID_STR_DESC,         
   USB_DESC_TYPE_STRING,       
   LOBYTE(USBD_LANGID_STRING),
@@ -178,11 +178,11 @@ uint8_t *USBD_HID_ProductStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length
 {
   if(speed == USBD_SPEED_HIGH)
   {   
-    USBD_GetString((uint8_t *)USBD_PRODUCT_HS_STRING, USBD_StrDesc, length);
+    USBD_GetString((uint8_t *)(uint8_t *)USBD_PRODUCT_HS_STRING, USBD_StrDesc, length);
   }
   else
   {
-    USBD_GetString((uint8_t *)USBD_PRODUCT_FS_STRING, USBD_StrDesc, length);    
+    USBD_GetString((uint8_t *)(uint8_t *)USBD_PRODUCT_FS_STRING, USBD_StrDesc, length);    
   }
   return USBD_StrDesc;
 }
@@ -198,7 +198,7 @@ uint8_t *USBD_HID_ManufacturerStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *l
   /* Prevent unused argument(s) compilation warning */
   UNUSED(speed);
 
-  USBD_GetString((uint8_t *)USBD_MANUFACTURER_STRING, USBD_StrDesc, length);
+  USBD_GetString((uint8_t *)(uint8_t *)USBD_MANUFACTURER_STRING, USBD_StrDesc, length);
   return USBD_StrDesc;
 }
 
@@ -231,11 +231,11 @@ uint8_t *USBD_HID_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
   if(speed == USBD_SPEED_HIGH)
   {  
-    USBD_GetString((uint8_t *)USBD_CONFIGURATION_HS_STRING, USBD_StrDesc, length);
+    USBD_GetString((uint8_t *)(uint8_t *)USBD_CONFIGURATION_HS_STRING, USBD_StrDesc, length);
   }
   else
   {
-    USBD_GetString((uint8_t *)USBD_CONFIGURATION_FS_STRING, USBD_StrDesc, length); 
+    USBD_GetString((uint8_t *)(uint8_t *)USBD_CONFIGURATION_FS_STRING, USBD_StrDesc, length); 
   }
   return USBD_StrDesc;  
 }
@@ -250,11 +250,11 @@ uint8_t *USBD_HID_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *leng
 {
   if(speed == USBD_SPEED_HIGH)
   {
-    USBD_GetString((uint8_t *)USBD_INTERFACE_HS_STRING, USBD_StrDesc, length);
+    USBD_GetString((uint8_t *)(uint8_t *)USBD_INTERFACE_HS_STRING, USBD_StrDesc, length);
   }
   else
   {
-    USBD_GetString((uint8_t *)USBD_INTERFACE_FS_STRING, USBD_StrDesc, length);
+    USBD_GetString((uint8_t *)(uint8_t *)USBD_INTERFACE_FS_STRING, USBD_StrDesc, length);
   }
   return USBD_StrDesc;  
 }
@@ -276,8 +276,8 @@ static void Get_SerialNum(void)
   
   if (deviceserial0 != 0)
   {
-    IntToUnicode (deviceserial0, (uint8_t*)&USBD_StringSerial[2] ,8);
-    IntToUnicode (deviceserial1, (uint8_t*)&USBD_StringSerial[18] ,4);
+    IntToUnicode (deviceserial0, &USBD_StringSerial[2] ,8);
+    IntToUnicode (deviceserial1, &USBD_StringSerial[18] ,4);
   }
 }
 
@@ -292,7 +292,7 @@ static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len)
 {
   uint8_t idx = 0;
   
-  for( idx = 0 ; idx < len ; idx ++)
+  for( idx = 0; idx < len; idx ++)
   {
     if( ((value >> 28)) < 0xA )
     {

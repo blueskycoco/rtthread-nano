@@ -103,12 +103,13 @@ ${COMPILER}/${VER}.axf: ${COMPILER}/rc4.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/crc.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/utils.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/flash_if.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usbd_hid.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_custom_hid_if.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_customhid.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/usbd_ioreq.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/usbd_ctlreq.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/usbd_core.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usbd_desc.o
-${COMPILER}/${VER}.axf: ${COMPILER}/usbd_conf.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_custom_hid_desc.o
+${COMPILER}/${VER}.axf: ${COMPILER}/usbd_custon_hid_conf.o
 #driver
 ${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_utils.o
 ${COMPILER}/${VER}.axf: ${COMPILER}/stm32f4xx_ll_usb.o

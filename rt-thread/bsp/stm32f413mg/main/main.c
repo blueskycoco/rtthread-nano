@@ -17,7 +17,7 @@
 #include "stm32f4xx_hal.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
-#include "usbd_hid.h" 
+#include "usbd_customhid_if.h" 
 
 USBD_HandleTypeDef USBD_Device;
 extern PCD_HandleTypeDef hpcd;
@@ -27,8 +27,9 @@ int main(void)
 	uint8_t flag = 0;
 
 	USBD_Init(&USBD_Device, &HID_Desc, 0);
-  	USBD_RegisterClass(&USBD_Device, USBD_HID_CLASS);
-  	USBD_Start(&USBD_Device);
+	USBD_RegisterClass(&USBD_Device, &USBD_CUSTOM_HID);
+	USBD_CUSTOM_HID_RegisterInterface(&USBD_Device, &USBD_CustomHID_fops);
+	USBD_Start(&USBD_Device);
 
 	while (1)
 	{

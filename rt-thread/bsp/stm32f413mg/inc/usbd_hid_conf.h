@@ -1,12 +1,12 @@
 /**
   ******************************************************************************
-  * @file    USB_Device/CustomHID_Standalone/Inc/usbd_conf.h
+  * @file    USB_Device/HID_Standalone/Inc/usbd_conf.h
   * @author  MCD Application Team
   * @brief   General low level driver configuration
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright © 2017 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -42,13 +42,11 @@
   *
   ******************************************************************************
   */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_CONF_H
 #define __USBD_CONF_H
 
 /* Includes ------------------------------------------------------------------*/
-#include <rtthread.h>
 #include "stm32f4xx_hal.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,12 +58,9 @@
 #define USBD_MAX_NUM_INTERFACES               1
 #define USBD_MAX_NUM_CONFIGURATION            1
 #define USBD_MAX_STR_DESC_SIZ                 0x100
-#define USBD_SUPPORT_USER_STRING              0
+#define USBD_SUPPORT_USER_STRING              0 
 #define USBD_SELF_POWERED                     1
 #define USBD_DEBUG_LEVEL                      0
-
-#define USBD_CUSTOMHID_OUTREPORT_BUF_SIZE     64
-#define USBD_CUSTOM_HID_REPORT_DESC_SIZE      28
 
 /* Exported macro ------------------------------------------------------------*/
 /* Memory management macros */   

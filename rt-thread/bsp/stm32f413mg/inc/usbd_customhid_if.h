@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    USB_Device/CustomHID_Standalone/Inc/usbd_conf.h
+  * @file    USB_Device/CustomHID_Standalone/Inc/usbd_customhid_if.h
   * @author  MCD Application Team
-  * @brief   General low level driver configuration
+  * @brief   Header for usbd_customhid_if.c file.
   ******************************************************************************
   * @attention
   *
@@ -41,66 +41,63 @@
   * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */
+  */ 
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __USBD_CONF_H
-#define __USBD_CONF_H
+#ifndef __USBD_CUSTOMHID_IF_H
+#define __USBD_CUSTOMHID_IF_H
 
 /* Includes ------------------------------------------------------------------*/
-#include <rtthread.h>
-#include "stm32f4xx_hal.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "usbd_customhid.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-/* Common Config */
-#define USBD_MAX_NUM_INTERFACES               1
-#define USBD_MAX_NUM_CONFIGURATION            1
-#define USBD_MAX_STR_DESC_SIZ                 0x100
-#define USBD_SUPPORT_USER_STRING              0
-#define USBD_SELF_POWERED                     1
-#define USBD_DEBUG_LEVEL                      0
+#define LED1_REPORT_ID           0x01
+#define LED1_REPORT_COUNT        0x01
 
-#define USBD_CUSTOMHID_OUTREPORT_BUF_SIZE     64
-#define USBD_CUSTOM_HID_REPORT_DESC_SIZE      28
+#define LED2_REPORT_ID           0x02
+#define LED2_REPORT_COUNT        0x01
+
+#define LED3_REPORT_ID           0x03
+#define LED3_REPORT_COUNT        0x01
+
+#define LED4_REPORT_ID           0x04
+#define LED4_REPORT_COUNT        0x01
+
+#define KEY_REPORT_ID            0x05
+#define TAMPER_REPORT_ID         0x06
+#define ADC_REPORT_ID            0x07
+
+/* User can use this section to tailor ADCx instance used and associated 
+   resources */
+/* Definition for ADCx clock resources */
+#define ADCx                            ADC1
+#define ADCx_CLK_ENABLE()               __HAL_RCC_ADC1_CLK_ENABLE()
+#define DMAx_CLK_ENABLE()               __HAL_RCC_DMA2_CLK_ENABLE()
+#define ADCx_CHANNEL_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOA_CLK_ENABLE()
+
+#define ADCx_FORCE_RESET()              __HAL_RCC_ADC_FORCE_RESET()
+#define ADCx_RELEASE_RESET()            __HAL_RCC_ADC_RELEASE_RESET()
+
+/* Definition for ADCx Channel Pin */
+#define ADCx_CHANNEL_PIN                GPIO_PIN_4
+#define ADCx_CHANNEL_GPIO_PORT          GPIOA
+
+/* Definition for ADCx's Channel */
+#define ADCx_CHANNEL                    ADC_CHANNEL_4
+
+/* Definition for ADCx's DMA */
+#define ADCx_DMA_CHANNEL                DMA_CHANNEL_0
+#define ADCx_DMA_STREAM                 DMA2_Stream0
+
+/* Definition for ADCx's NVIC */
+#define ADCx_DMA_IRQn                   DMA2_Stream0_IRQn
+#define ADCx_DMA_IRQHandler             DMA2_Stream0_IRQHandler
 
 /* Exported macro ------------------------------------------------------------*/
-/* Memory management macros */   
-#define USBD_malloc               rt_malloc
-#define USBD_free                 rt_free
-#define USBD_memset               rt_memset
-#define USBD_memcpy               rt_memcpy
-    
-/* DEBUG macros */  
-#if (USBD_DEBUG_LEVEL > 0)
-#define  USBD_UsrLog(...)   rt_kprintf(__VA_ARGS__);\
-                            rt_kprintf("\n");
-#else
-#define USBD_UsrLog(...)   
-#endif                            
-                            
-#if (USBD_DEBUG_LEVEL > 1)
-
-#define  USBD_ErrLog(...)   rt_kprintf("ERROR: ") ;\
-                            rt_kprintf(__VA_ARGS__);\
-                            rt_kprintf("\n");
-#else
-#define USBD_ErrLog(...)   
-#endif 
-                                                        
-#if (USBD_DEBUG_LEVEL > 2)                         
-#define  USBD_DbgLog(...)   rt_kprintf("DEBUG : ") ;\
-                            rt_kprintf(__VA_ARGS__);\
-                            rt_kprintf("\n");
-#else
-#define USBD_DbgLog(...)                         
-#endif
-
 /* Exported functions ------------------------------------------------------- */
+extern USBD_CUSTOM_HID_ItfTypeDef USBD_CustomHID_fops;
 
-#endif /* __USBD_CONF_H */
+#endif /* __USBD_CUSTOMHID_IF_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

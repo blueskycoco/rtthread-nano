@@ -1,12 +1,12 @@
 /**
   ******************************************************************************
-  * @file    USB_Device/CustomHID_Standalone/Inc/usbd_conf.h
+  * @file    USB_Device/HID_Standalone/Inc/usbd_desc.h
   * @author  MCD Application Team
-  * @brief   General low level driver configuration
+  * @brief   Header for usbd_desc.c module
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
+  * <h2><center>&copy; Copyright © 2017 STMicroelectronics International N.V. 
   * All rights reserved.</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -42,65 +42,24 @@
   *
   ******************************************************************************
   */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __USBD_CONF_H
-#define __USBD_CONF_H
+#ifndef __USBD_DESC_H
+#define __USBD_DESC_H
 
 /* Includes ------------------------------------------------------------------*/
-#include <rtthread.h>
-#include "stm32f4xx_hal.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "usbd_def.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-/* Common Config */
-#define USBD_MAX_NUM_INTERFACES               1
-#define USBD_MAX_NUM_CONFIGURATION            1
-#define USBD_MAX_STR_DESC_SIZ                 0x100
-#define USBD_SUPPORT_USER_STRING              0
-#define USBD_SELF_POWERED                     1
-#define USBD_DEBUG_LEVEL                      0
+#define         DEVICE_ID1          (0x1FFF7A10)
+#define         DEVICE_ID2          (0x1FFF7A14)
+#define         DEVICE_ID3          (0x1FFF7A18)
 
-#define USBD_CUSTOMHID_OUTREPORT_BUF_SIZE     64
-#define USBD_CUSTOM_HID_REPORT_DESC_SIZE      28
-
+#define  USB_SIZ_STRING_SERIAL       0x1A
 /* Exported macro ------------------------------------------------------------*/
-/* Memory management macros */   
-#define USBD_malloc               rt_malloc
-#define USBD_free                 rt_free
-#define USBD_memset               rt_memset
-#define USBD_memcpy               rt_memcpy
-    
-/* DEBUG macros */  
-#if (USBD_DEBUG_LEVEL > 0)
-#define  USBD_UsrLog(...)   rt_kprintf(__VA_ARGS__);\
-                            rt_kprintf("\n");
-#else
-#define USBD_UsrLog(...)   
-#endif                            
-                            
-#if (USBD_DEBUG_LEVEL > 1)
-
-#define  USBD_ErrLog(...)   rt_kprintf("ERROR: ") ;\
-                            rt_kprintf(__VA_ARGS__);\
-                            rt_kprintf("\n");
-#else
-#define USBD_ErrLog(...)   
-#endif 
-                                                        
-#if (USBD_DEBUG_LEVEL > 2)                         
-#define  USBD_DbgLog(...)   rt_kprintf("DEBUG : ") ;\
-                            rt_kprintf(__VA_ARGS__);\
-                            rt_kprintf("\n");
-#else
-#define USBD_DbgLog(...)                         
-#endif
-
 /* Exported functions ------------------------------------------------------- */
+extern USBD_DescriptorsTypeDef HID_Desc;
 
-#endif /* __USBD_CONF_H */
-
+#endif /* __USBD_DESC_H */
+ 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
