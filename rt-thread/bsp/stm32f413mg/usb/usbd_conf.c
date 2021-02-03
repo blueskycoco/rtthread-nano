@@ -287,7 +287,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   hpcd.Init.phy_itface = PCD_PHY_EMBEDDED;
   hpcd.Init.Sof_enable = 0;
   hpcd.Init.speed = PCD_SPEED_FULL;
-  hpcd.Init.vbus_sensing_enable = 1;
+  hpcd.Init.vbus_sensing_enable = 0;
   hpcd.Init.lpm_enable = 0;
   
   /* Link The driver to the stack */
@@ -531,7 +531,7 @@ static void SystemClockConfig_STOP(void)
   }
 
   /* Select PLLSAI output as USB clock source */
-  PeriphClkInitStruct.PLLI2S.PLLI2SM = 8;
+  PeriphClkInitStruct.PLLI2S.PLLI2SM = 25;
   PeriphClkInitStruct.PLLI2S.PLLI2SQ = 4;
   PeriphClkInitStruct.PLLI2S.PLLI2SN = 192;
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CK48;
