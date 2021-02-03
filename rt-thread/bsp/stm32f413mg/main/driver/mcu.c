@@ -349,7 +349,8 @@ static void mcu_cmd_handler(void *param)
 				remove_mem(TYPE_D2H, &cmd, &len);
 				if (len > 0) {
 					//dump_host_cmd("d2h", cmd, len);
-					uart_rsp_out(cmd, len);
+					//uart_rsp_out(cmd, len);
+					hid_out(cmd, len);
 				}
 			}
 		}

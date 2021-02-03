@@ -48,7 +48,15 @@
 #include "usbd_core.h"
 #include "usbd_desc.h"
 #include "usbd_customhid.h" 
+#include "mcu.h"
+#include "mcu_cmd.h"
+#include "utils.h"
+#include "mem_list.h"
 //#include "main.h"
+uint8_t uart_rx_buf[64] = {0};
+uint8_t uart_tx_buf[64] = {0};
+extern struct rt_semaphore ota_sem;
+extern rt_bool_t ota_mode;
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -244,12 +252,24 @@ static int8_t CustomHID_DeInit(void)
   */
 static int8_t CustomHID_OutEvent  (uint8_t* event_idx, uint16_t len)
 {
+#if 1
+	if (ota_mode) {
+			insert_mem(TYPE_H2D, event_idx, 64);
+    			rt_sem_release(&ota_sem);
+	} else {
+			insert_mem(TYPE_H2D, event_idx, 64);
+			notify_event(EVENT_OV2ST);
+	}
+#endif
+#if 1
 	int i;
 	for (i=0; i<len; i++) {
 		if (i != 0 && (i % 16) ==0)
 			rt_kprintf("\r\n");
 		rt_kprintf("%02x ", event_idx[i]);
 	}
+	rt_kprintf("\r\nota_mode = %d\r\n", ota_mode);
+#endif
 	return (0);
 }
 
@@ -258,8 +278,8 @@ static int8_t CustomHID_OutEvent  (uint8_t* event_idx, uint16_t len)
   * @param GPIO_Pin: Specifies the pins connected EXTI line
   * @retval None
   */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+void hid_out(uint8_t *buf, uint16_t len)
 {
-    USBD_CUSTOM_HID_SendReport(&USBD_Device, SendBuffer, 2);
+    USBD_CUSTOM_HID_SendReport(&USBD_Device, buf, len);
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

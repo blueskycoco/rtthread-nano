@@ -75,15 +75,17 @@ static enum rym_code _rym_read_code(
 		/* No data yet, wait for one */
 		if (rt_sem_take(&ota_sem, timeout) != RT_EOK) {
 			//uart_rx_set();
-			//rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
+			rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
 			return RYM_CODE_NONE;
 		}
 		remove_mem(TYPE_H2D, &cmd, &len);
-		if (len == 0)
-			continue;
+		if (len == 0) {
+			rt_kprintf("%s %d: no data\r\n", __func__, __LINE__);
+			//continue;
+		}
 
-		//rt_kprintf("%s %d: %x %x\r\n", __func__, __LINE__, cmd[0],
-		//		cmd[1]);
+		rt_kprintf("%s %d: %x %x\r\n", __func__, __LINE__, cmd[0],
+				cmd[1]);
 		/* Try to read one */
 		ctx->buf[0] = cmd[1];
 		//uart_rx_set();
@@ -100,24 +102,16 @@ static rt_size_t _rym_read_data(
 	/* we should already have had the code */
 	rt_uint8_t *buf = ctx->buf;// + 1;
 	rt_size_t readlen = len;
-	uint8_t *cmd1;
-	uint8_t *cmd2;
-	uint8_t *cmd3;
+	uint8_t *cmd;
 	uint16_t cmd_len = 0;
 	int i, j = 0;
 
 	while (rt_sem_take(&ota_sem, RYM_WAIT_CHR_TICK) == RT_EOK)
 	{
-		do {
-		if (j == 0)
-			remove_mem(TYPE_H2D, &cmd1, &cmd_len);
-		else if (j == 1)
-			remove_mem(TYPE_H2D, &cmd2, &cmd_len);
-		else if (j == 2)
-			remove_mem(TYPE_H2D, &cmd3, &cmd_len);
-		if (cmd_len == 0)
-			break;
-		j++;
+		//do {
+			remove_mem(TYPE_H2D, &cmd, &cmd_len);
+			if (cmd_len <= 0)
+				continue;
 		//rt_kprintf("%s %d: cmd_len %d, %x %x %x\r\n", __func__, __LINE__,
 		//		cmd_len, cmd[0], cmd[1], cmd[2]);
 		//for (i=0; i<cmd_len; i++)
@@ -130,12 +124,13 @@ static rt_size_t _rym_read_data(
 		//	memcpy(buf, cmd+1, readlen);
 		//	readlen = 0;
 		//}i
-		if (j == 3) {
-		rt_memcpy(buf, cmd3+1, 63);
-		rt_memcpy(buf+63, cmd2+1, 63);
-		rt_memcpy(buf+126, cmd1+1, len - 126);
-		readlen = 0;
-		}
+		
+		if (j == 2) {
+			readlen = 0;
+			rt_memcpy(buf + 63*j, cmd+1, len - 126);
+		} else
+			rt_memcpy(buf + 63*j, cmd+1, 63);
+		j++;
 		//uart_rx_set();
 		if (readlen == 0) {
 			//rt_kprintf("%s %d: readlen %d, %x %x %x\r\n", __func__, __LINE__,
@@ -145,7 +140,7 @@ static rt_size_t _rym_read_data(
 			//rt_kprintf("\r\n");
 			return len;
 		}
-		} while (cmd_len != 0);
+		//} while (cmd_len != 0);
 	}
 
 			//rt_kprintf("%s %d: readlen %d\r\n", __func__, __LINE__,
@@ -158,7 +153,8 @@ static rt_size_t _rym_putchar(struct rym_ctx *ctx, rt_uint8_t code)
 {
 	uart_tx_buf[0] = HID_REPORT_ID;
 	uart_tx_buf[1] = code;
-	uart_tx_set();
+	//uart_tx_set();
+	hid_out(uart_tx_buf, 64);
 	rt_sem_take(&ota_sem, RT_WAITING_FOREVER);
 	return 1;
 }
@@ -182,8 +178,8 @@ static rt_err_t _rym_do_handshake(
 	{
 		_rym_putchar(ctx, RYM_CODE_C);
 		code = _rym_read_code(ctx,
-				100);
-		//rt_kprintf("%s %d code %x\r\n", __func__, __LINE__, code);
+				1000);
+		rt_kprintf("%s %d code %x\r\n", __func__, __LINE__, code);
 		if (code == RYM_CODE_SOH)
 		{
 			data_sz = _RYM_SOH_PKG_SZ;
@@ -195,8 +191,8 @@ static rt_err_t _rym_do_handshake(
 			break;
 		}
 	}
-	//rt_kprintf("%s %d: i %d, tm_sec %d\r\n", __func__, __LINE__,
-	//		i, tm_sec);
+	rt_kprintf("%s %d: i %d, tm_sec %d\r\n", __func__, __LINE__,
+			i, tm_sec);
 	if (i == tm_sec)
 	{
 		return -RYM_ERR_TMO;
@@ -239,7 +235,8 @@ static rt_err_t _rym_do_handshake(
 	rt_memcpy(md5, ctx->buf + 7, 16);
 #endif
 
-        uint32_t level = rt_hw_interrupt_disable();
+#if 0
+	uint32_t level = rt_hw_interrupt_disable();
 	if (!FLASH_If_GetWriteProtectionStatus(PARAM_S_ADDRESS))
 		FLASH_If_DisableWriteProtection(PARAM_S_ADDRESS);
 	if (!FLASH_If_GetWriteProtectionStatus(APP_S_ADDRESS))
@@ -253,6 +250,7 @@ static rt_err_t _rym_do_handshake(
 	if (0 != FLASH_If_Write(PARAM_S_ADDRESS, (uint32_t *)param, 4096))
 		rt_kprintf("write param failed\r\n");
         rt_hw_interrupt_enable(level);
+#endif
 	g_ofs = 0;
 	rt_kprintf("handshake ok, fw len %d, md5: \r\n", flen);
 	for (i=0; i<16; i++)
@@ -299,11 +297,13 @@ static rt_err_t _rym_trans_data(
 				__LINE__, recv_crc, CRC16(ctx->buf + 3, data_sz));
 		return -RYM_ERR_CRC;
 	}
+#if 0
         uint32_t level = rt_hw_interrupt_disable();
 	if (0 != FLASH_If_Write((uint32_t)(APP_S_ADDRESS + g_ofs),
 			(uint32_t *)(ctx->buf+3), data_sz/4))
 		rt_kprintf("flash write %x failed\r\n", APP_S_ADDRESS+g_ofs);
         rt_hw_interrupt_enable(level);
+#endif
 	g_ofs += data_sz;
 	/* congratulations, check passed. */
 	*code = RYM_CODE_ACK;
@@ -327,7 +327,7 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 				RYM_WAIT_PKG_TICK);
 		//??
 		//rt_kprintf("%s %d, code %x\r\n", __func__, __LINE__, code);
-		rt_thread_mdelay(10);
+		//rt_thread_mdelay(10);
 		switch (code)
 		{
 			case RYM_CODE_SOH:
@@ -374,7 +374,7 @@ static rt_err_t _rym_do_fin(struct rym_ctx *ctx)
 	ctx->stage = RYM_STAGE_FINISHING;
 	/* we already got one EOT in the caller. invoke the callback if there is
 	 * one. */
-	FLASH_Lock();
+	//FLASH_Lock();
 	_rym_putchar(ctx, RYM_CODE_NAK);
 	code = _rym_read_code(ctx, RYM_WAIT_PKG_TICK);
 	if (code != RYM_CODE_EOT)
@@ -476,7 +476,7 @@ static void ota_handler(void *param)
 
 void ota_start()
 {
-	FLASH_If_Init();
+	//FLASH_If_Init();
     	rt_thread_init(&ota_thread, "ota", ota_handler, RT_NULL,
                             ota_stack, sizeof(ota_stack), RT_THREAD_PRIORITY_MAX / 3, 20);
 	rt_thread_startup(&ota_thread);

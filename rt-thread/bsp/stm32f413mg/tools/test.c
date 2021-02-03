@@ -39,11 +39,11 @@ int main(int argc, void* argv[])
 	memset(cmd, 0x33, 64);
 	cmd[62] = '\r';
 	cmd[63] = '\n';
-	rcv_len = hid_xfer(handle, 0x02, cmd, 64, 1000);
+	rcv_len = hid_xfer(handle, 0x01, cmd, 64, 1000);
 	
 	while(1) {
-		len = hid_xfer(handle, 0x82, rsp, 64, 1000);
-		if (len > 0) {
+		rcv_len = hid_xfer(handle, 0x01, cmd, 64, 1000);
+		if (rcv_len > 0) {
 #if 0
 			acc[0] = (int16_t)((rsp[1] << 24) | (rsp[2] << 16) | (rsp[3] << 8) | (rsp[4] << 0));
 			acc[1] = (int16_t)((rsp[5] << 24) | (rsp[6] << 16) | (rsp[7] << 8) | (rsp[8] << 0));

@@ -26,6 +26,13 @@ int main(void)
 {
 	uint8_t flag = 0;
 
+	if (warm_boot()) {
+		protocol_init();
+	} else {
+		verify_and_jump();
+		protocol_init();
+	}
+	
 	USBD_Init(&USBD_Device, &HID_Desc, 0);
 	USBD_RegisterClass(&USBD_Device, &USBD_CUSTOM_HID);
 	USBD_CUSTOM_HID_RegisterInterface(&USBD_Device, &USBD_CustomHID_fops);

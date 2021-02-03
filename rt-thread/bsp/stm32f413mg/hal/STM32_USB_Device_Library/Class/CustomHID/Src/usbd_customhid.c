@@ -45,8 +45,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_customhid.h"
 #include "usbd_ctlreq.h"
+#include "mcu.h"
+#include "mcu_cmd.h"
+#include "utils.h"
+#include "mem_list.h"
 
 
+extern struct rt_semaphore ota_sem;
+extern rt_bool_t ota_mode;
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
   */
@@ -622,6 +628,10 @@ static uint8_t  USBD_CUSTOM_HID_DataIn (USBD_HandleTypeDef *pdev,
   /* Ensure that the FIFO is empty before a new transfer, this condition could
   be caused by  a new transfer before the end of the previous transfer */
   ((USBD_CUSTOM_HID_HandleTypeDef *)pdev->pClassData)->state = CUSTOM_HID_IDLE;
+	if (ota_mode)
+    		rt_sem_release(&ota_sem);
+	else
+		notify_event(EVENT_ST2OV);
 
   return USBD_OK;
 }

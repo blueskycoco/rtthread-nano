@@ -345,6 +345,10 @@ int enter_ota()
 			printf("%02x ", rsp[i]);
 		}
 		printf("\r\n");
+		if (rsp[0] == 0x01 && rsp[1] == 0x43) {
+			close_usb(dev, INTF_MCU);
+			return 0;
+		}
 	} while (rsp_len > 0);
 	//usb_xfer(dev, USB_ENDPOINT_OUT, 0xE2, 0x00, 0x01, NULL, 0);
 	//usb_xfer(dev, USB_ENDPOINT_IN, 0xE1, 0x00, 0x01, &glasses_v, 1);
