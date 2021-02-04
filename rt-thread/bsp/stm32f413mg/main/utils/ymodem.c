@@ -85,8 +85,8 @@ static enum rym_code _rym_read_code(
 			rt_kprintf("%s %d: no data\r\n", __func__, __LINE__);
 			continue;
 		}
-		rt_kprintf("%s %d: %x %x\r\n", __func__, __LINE__, cmd[0],
-				cmd[1]);
+		//rt_kprintf("%s %d: %x %x\r\n", __func__, __LINE__, cmd[0],
+		//		cmd[1]);
 		/* Try to read one */
 		ctx->buf[0] = cmd[1];
 		//uart_rx_set();
@@ -186,7 +186,7 @@ static rt_err_t _rym_do_handshake(
 		_rym_putchar(ctx, RYM_CODE_C);
 		code = _rym_read_code(ctx,
 				1000);
-		rt_kprintf("%s %d code %x\r\n", __func__, __LINE__, code);
+		//rt_kprintf("%s %d code %x\r\n", __func__, __LINE__, code);
 		if (code == RYM_CODE_SOH)
 		{
 			data_sz = _RYM_SOH_PKG_SZ;
@@ -198,8 +198,8 @@ static rt_err_t _rym_do_handshake(
 			break;
 		}
 	}
-	rt_kprintf("%s %d: i %d, tm_sec %d\r\n", __func__, __LINE__,
-			i, tm_sec);
+	//rt_kprintf("%s %d: i %d, tm_sec %d\r\n", __func__, __LINE__,
+			//i, tm_sec);
 	if (i == tm_sec)
 	{
 		return -RYM_ERR_TMO;
@@ -319,14 +319,14 @@ static rt_err_t _rym_trans_data(
 
 static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 {
-	rt_kprintf("%s %d\r\n", __func__, __LINE__);
-	rt_thread_mdelay(250);
+	//rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	//rt_thread_mdelay(250);
 	_rym_putchar(ctx, RYM_CODE_ACK);
-	rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	//rt_kprintf("%s %d\r\n", __func__, __LINE__);
 	rt_thread_mdelay(250);
 	_rym_putchar(ctx, RYM_CODE_C);
 	ctx->stage = RYM_STAGE_ESTABLISHED;
-	rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	//rt_kprintf("%s %d\r\n", __func__, __LINE__);
 
 	while (1)
 	{
@@ -336,7 +336,7 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 		code = _rym_read_code(ctx,
 				RYM_WAIT_PKG_TICK);
 		//??
-		rt_kprintf("%s %d, code %x\r\n", __func__, __LINE__, code);
+		//rt_kprintf("%s %d, code %x\r\n", __func__, __LINE__, code);
 		rt_thread_mdelay(10);
 		switch (code)
 		{

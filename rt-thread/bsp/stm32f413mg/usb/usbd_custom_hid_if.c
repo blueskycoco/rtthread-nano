@@ -255,7 +255,7 @@ static int8_t CustomHID_OutEvent  (uint8_t* event_idx, uint16_t len)
 #if 1
 	if (ota_mode) {
 			insert_mem(TYPE_H2D, event_idx, 64);
-			rt_kprintf("->%d\r\n", HAL_GetTick()); 
+			//rt_kprintf("->%d\r\n", HAL_GetTick()); 
     			rt_sem_release(&ota_sem);
 	} else {
 			insert_mem(TYPE_H2D, event_idx, 64);
