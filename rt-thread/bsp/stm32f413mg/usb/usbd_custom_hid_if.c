@@ -243,7 +243,7 @@ static int8_t CustomHID_DeInit(void)
   return (0);
 }
 
-
+extern uint8_t read_state;
 /**
   * @brief  CustomHID_OutEvent
   *         Manage the CUSTOM HID class Out Event    
@@ -255,13 +255,14 @@ static int8_t CustomHID_OutEvent  (uint8_t* event_idx, uint16_t len)
 #if 1
 	if (ota_mode) {
 			insert_mem(TYPE_H2D, event_idx, 64);
+			rt_kprintf("->%d\r\n", HAL_GetTick()); 
     			rt_sem_release(&ota_sem);
 	} else {
 			insert_mem(TYPE_H2D, event_idx, 64);
 			notify_event(EVENT_OV2ST);
 	}
 #endif
-#if 1
+#if 0
 	int i;
 	for (i=0; i<len; i++) {
 		if (i != 0 && (i % 16) ==0)

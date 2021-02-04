@@ -34,6 +34,7 @@ extern uint8_t uart_rx_buf[64];
 extern uint8_t uart_tx_buf[64];
 static uint8_t param[16384] = {0};
 static uint32_t g_ofs = 0;
+uint8_t read_state = 0;// 0 for code, 1 for packet
 /* SOH/STX + seq + payload + crc */
 #define _RYM_SOH_PKG_SZ (1+2+128+2)
 #define _RYM_STX_PKG_SZ (1+2+1024+2)
@@ -78,12 +79,12 @@ static enum rym_code _rym_read_code(
 			rt_kprintf("%s %d: timeout \r\n", __func__, __LINE__);
 			return RYM_CODE_NONE;
 		}
+		//rt_kprintf("<-%d\r\n", HAL_GetTick()); 
 		remove_mem(TYPE_H2D, &cmd, &len);
 		if (len == 0) {
 			rt_kprintf("%s %d: no data\r\n", __func__, __LINE__);
-			//continue;
+			continue;
 		}
-
 		rt_kprintf("%s %d: %x %x\r\n", __func__, __LINE__, cmd[0],
 				cmd[1]);
 		/* Try to read one */
@@ -102,21 +103,23 @@ static rt_size_t _rym_read_data(
 	/* we should already have had the code */
 	rt_uint8_t *buf = ctx->buf;// + 1;
 	rt_size_t readlen = len;
-	uint8_t *cmd;
+	uint8_t *cmd, *cmd1, *cmd2;
 	uint16_t cmd_len = 0;
 	int i, j = 0;
 
 	while (rt_sem_take(&ota_sem, RYM_WAIT_CHR_TICK) == RT_EOK)
 	{
-		//do {
-			remove_mem(TYPE_H2D, &cmd, &cmd_len);
-			if (cmd_len <= 0)
+		//rt_kprintf("<-%d\r\n", HAL_GetTick()); 
+				remove_mem(TYPE_H2D, &cmd, &cmd_len);
+			if (cmd_len == 0) {
+				rt_kprintf("%s %d: cmd_len 0\r\n", __func__, __LINE__);
 				continue;
-		//rt_kprintf("%s %d: cmd_len %d, %x %x %x\r\n", __func__, __LINE__,
-		//		cmd_len, cmd[0], cmd[1], cmd[2]);
+			}
 		//for (i=0; i<cmd_len; i++)
 		//	rt_kprintf("%02x ", cmd[i]);
 		//rt_kprintf("\r\n");
+		//rt_kprintf("%s %d: cmd_len %d, %x %x %x\r\n", __func__, __LINE__,
+		//		cmd_len, cmd[0], cmd[1], cmd[2]);
 		//if (readlen >= 63) {
 		//	memcpy(buf+readlen-63, cmd+1, 63);
 		//	readlen -= 63;
@@ -127,9 +130,12 @@ static rt_size_t _rym_read_data(
 		
 		if (j == 2) {
 			readlen = 0;
-			rt_memcpy(buf + 63*j, cmd+1, len - 126);
-		} else
-			rt_memcpy(buf + 63*j, cmd+1, 63);
+			rt_memcpy(buf, cmd+1, 63);
+		} else if (j == 0) {
+			rt_memcpy(buf + 126, cmd+1, len - 126);
+		} else if (j == 1) {
+			rt_memcpy(buf + 63, cmd+1, 63);
+		}
 		j++;
 		//uart_rx_set();
 		if (readlen == 0) {
@@ -140,7 +146,6 @@ static rt_size_t _rym_read_data(
 			//rt_kprintf("\r\n");
 			return len;
 		}
-		//} while (cmd_len != 0);
 	}
 
 			//rt_kprintf("%s %d: readlen %d\r\n", __func__, __LINE__,
@@ -155,7 +160,9 @@ static rt_size_t _rym_putchar(struct rym_ctx *ctx, rt_uint8_t code)
 	uart_tx_buf[1] = code;
 	//uart_tx_set();
 	hid_out(uart_tx_buf, 64);
+	//rt_kprintf("-->%d\r\n", HAL_GetTick()); 
 	rt_sem_take(&ota_sem, RT_WAITING_FOREVER);
+	//rt_kprintf("<--%d\r\n", HAL_GetTick()); 
 	return 1;
 }
 
@@ -312,11 +319,14 @@ static rt_err_t _rym_trans_data(
 
 static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 {
-	//rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	rt_kprintf("%s %d\r\n", __func__, __LINE__);
+	rt_thread_mdelay(250);
 	_rym_putchar(ctx, RYM_CODE_ACK);
+	rt_kprintf("%s %d\r\n", __func__, __LINE__);
 	rt_thread_mdelay(250);
 	_rym_putchar(ctx, RYM_CODE_C);
 	ctx->stage = RYM_STAGE_ESTABLISHED;
+	rt_kprintf("%s %d\r\n", __func__, __LINE__);
 
 	while (1)
 	{
@@ -326,8 +336,8 @@ static rt_err_t _rym_do_trans(struct rym_ctx *ctx)
 		code = _rym_read_code(ctx,
 				RYM_WAIT_PKG_TICK);
 		//??
-		//rt_kprintf("%s %d, code %x\r\n", __func__, __LINE__, code);
-		//rt_thread_mdelay(10);
+		rt_kprintf("%s %d, code %x\r\n", __func__, __LINE__, code);
+		rt_thread_mdelay(10);
 		switch (code)
 		{
 			case RYM_CODE_SOH:

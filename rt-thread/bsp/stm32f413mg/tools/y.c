@@ -81,10 +81,14 @@ int _rym_send_packet(
 	ctx->buf[3] = index_inv;
 	ctx->buf[132] = (uint8_t)(send_crc >> 8);
 	ctx->buf[133] = (uint8_t)send_crc & 0xff;
-
-	//for (i=0; i<135; i++)
-	//	printf("%02x ", ctx->buf[i]);
-	//printf("\r\n");
+#if 0
+	for (i=0; i<134; i++) {
+		if (i==64 || i==127)
+			printf("\r\n");
+		printf("%02x ", ctx->buf[i]);
+	}
+	printf("\r\n");
+#endif
 	hid_xfer(handle, 0x01, ctx->buf, 64, 1000);
 	tmp[0] = 0x01;
 	//sleep(1);	

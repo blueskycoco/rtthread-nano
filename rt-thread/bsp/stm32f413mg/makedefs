@@ -142,7 +142,7 @@ OBJCOPY=${PREFIX}-objcopy
 # Tell the compiler to include debugging information if the DEBUG environment
 # variable is set.
 #
-DEBUG = 1
+#DEBUG = 1
 ifdef DEBUG
 CFLAGS+=-g -D DEBUG -O0
 else
