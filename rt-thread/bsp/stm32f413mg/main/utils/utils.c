@@ -9,16 +9,14 @@ extern uint8_t uart_rx_buf[64];
 extern uint8_t uart_tx_buf[64];
 rt_bool_t warm_boot()
 {
-#if 0
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
-	PWR_BackupAccessCmd(ENABLE);
-
-	uint32_t flag = RTC_ReadBackupRegister(RTC_BKP_DR0);
+	uint32_t flag = 0;
+	HAL_PWR_EnableBkUpAccess();
+	uint32_t tmp = (uint32_t)0x40002850;
+	flag = *(__IO uint32_t *)tmp;
+	HAL_PWR_DisableBkUpAccess();
 	rt_kprintf("warm boot: %x\r\n", flag);
-	PWR_BackupAccessCmd(DISABLE);
 	if (flag == TYPE_WARM_BOOT)
 		return RT_TRUE;
-#endif
 	return RT_FALSE;
 }
 
@@ -44,6 +42,10 @@ void read_ts_64(uint8_t *ts)
 void reboot()
 {
 	//RTC_WriteBackupRegister(RTC_BKP_DR0, 0x00);
+	HAL_PWR_EnableBkUpAccess();
+	uint32_t tmp = (uint32_t)0x40002850;
+	*(__IO uint32_t *)tmp = (uint32_t)0;
+	HAL_PWR_DisableBkUpAccess();
 	__set_FAULTMASK(1);
 	NVIC_SystemReset();
 }

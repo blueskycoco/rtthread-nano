@@ -17,9 +17,10 @@
 #include <stdlib.h>
 #include "mcu.h"
 #include "mem_list.h"
+#include "stm32f4xx_hal.h"
 
-#define PARAM_S_ADDRESS 	0x08008000
-#define PARAM_E_ADDRESS		0x0800bfff
+#define PARAM_S_ADDRESS 	0x0800c000
+#define PARAM_E_ADDRESS		0x0800ffff
 #define APP_S_ADDRESS 		0x08020000
 #define APP_E_ADDRESS		0x0805ffff
 #define FW_LEN_OFS		0x00
@@ -242,12 +243,8 @@ static rt_err_t _rym_do_handshake(
 	rt_memcpy(md5, ctx->buf + 7, 16);
 #endif
 
-#if 0
+#if 1
 	uint32_t level = rt_hw_interrupt_disable();
-	if (!FLASH_If_GetWriteProtectionStatus(PARAM_S_ADDRESS))
-		FLASH_If_DisableWriteProtection(PARAM_S_ADDRESS);
-	if (!FLASH_If_GetWriteProtectionStatus(APP_S_ADDRESS))
-		FLASH_If_DisableWriteProtection(APP_S_ADDRESS);
 	rt_memcpy(param, (const void *)PARAM_S_ADDRESS, 16384);
 	rt_memcpy(param, ctx->buf+3, 20);
 	if (0 != FLASH_If_Erase(PARAM_S_ADDRESS, PARAM_E_ADDRESS))
@@ -304,7 +301,7 @@ static rt_err_t _rym_trans_data(
 				__LINE__, recv_crc, CRC16(ctx->buf + 3, data_sz));
 		return -RYM_ERR_CRC;
 	}
-#if 0
+#if 1
         uint32_t level = rt_hw_interrupt_disable();
 	if (0 != FLASH_If_Write((uint32_t)(APP_S_ADDRESS + g_ofs),
 			(uint32_t *)(ctx->buf+3), data_sz/4))
@@ -380,7 +377,6 @@ static rt_err_t _rym_do_fin(struct rym_ctx *ctx)
 	rt_uint16_t recv_crc;
 	rt_size_t i;
 	rt_size_t data_sz;
-
 	ctx->stage = RYM_STAGE_FINISHING;
 	/* we already got one EOT in the caller. invoke the callback if there is
 	 * one. */
@@ -468,6 +464,7 @@ static rt_err_t _rym_do_recv(
 		}
 
 		if (ctx->stage == RYM_STAGE_FINISHED) {
+			HAL_FLASH_Lock();
 			verify_and_jump();
 			break;
 		}
@@ -486,7 +483,7 @@ static void ota_handler(void *param)
 
 void ota_start()
 {
-	//FLASH_If_Init();
+    	HAL_FLASH_Unlock();
     	rt_thread_init(&ota_thread, "ota", ota_handler, RT_NULL,
                             ota_stack, sizeof(ota_stack), RT_THREAD_PRIORITY_MAX / 3, 20);
 	rt_thread_startup(&ota_thread);

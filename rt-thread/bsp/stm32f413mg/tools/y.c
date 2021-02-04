@@ -174,7 +174,7 @@ int _rym_do_send_handshake(
 	MD5Final(&md5, decrypt);
 	for (i=0; i<16; i++)
 		printf("%02x", decrypt[i]);
-	printf("\r\n");
+	printf("\r\n\r\n");
 	memcpy(ctx->buf+8, decrypt, 16);
 	//sprintf((char *)(ctx->buf+4), "%s%c%ld", (char *)file_name, insert_0,
 	//			g_file_len);
@@ -279,6 +279,7 @@ static int _rym_do_send_fin(struct rym_ctx *ctx)
 
 	_rym_putchar(ctx, RYM_CODE_SOH);
 	_rym_send_packet(ctx, code, index);
+	getc_ack = _rym_getchar(ctx);
 
 	ctx->stage = RYM_STAGE_FINISHED;
 
