@@ -12,7 +12,7 @@ jump_app jump;
 
 static void app_boot()
 {
-#if 0
+#if 1
 	rt_hw_interrupt_disable();
 	if (((*(__IO uint32_t*)(APP_ADDRESS + 4)) & 0xFF000000 ) == 0x08000000)
 	{
