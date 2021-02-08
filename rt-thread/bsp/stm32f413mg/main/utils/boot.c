@@ -57,9 +57,9 @@ void verify_and_jump()
 	MD5Final(&md5, decrypt);
 
 	for (i=0; i<16; i++) {
-		if (decrypt[i] == fw_md5[i])
-			rt_kprintf("%02x == %02x\r\n", decrypt[i], fw_md5[i]);
-		else {
+		if (decrypt[i] != fw_md5[i])
+			/*rt_kprintf("%02x == %02x\r\n", decrypt[i], fw_md5[i]);
+		else */{
 			rt_kprintf("%02x != %02x\r\n", decrypt[i], fw_md5[i]);
 			boot = 0;
 		}
