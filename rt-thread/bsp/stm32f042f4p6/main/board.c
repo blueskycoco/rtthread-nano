@@ -131,7 +131,7 @@ static int uart_init(void)
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-	USART_InitStructure.USART_BaudRate = 2000000;
+	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -141,7 +141,7 @@ static int uart_init(void)
 	USART_Init(USART2, &USART_InitStructure);
 	USART_Init(USART1, &USART_InitStructure);
 
-	uart_dma_config();
+	//uart_dma_config();
 
 	USART_ITConfig(USART2, USART_IT_ORE, ENABLE);	
 	USART_ITConfig(USART2, USART_IT_ERR, ENABLE);	
@@ -155,6 +155,74 @@ static int uart_init(void)
 
 INIT_BOARD_EXPORT(uart_init);
 
+static int st7585_init(void) {
+	/*
+	 * PA7 -- SI
+	 * PA6 -- RSX
+	 * PA4 -- CSX
+	 * PA5 -- SCL
+	 * PA1 -- RES
+	 */
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_1 | GPIO_Pin_6;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	NVIC_InitTypeDef NVIC_InitStructure;
+	SPI_InitTypeDef  SPI_InitStructure;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource5, GPIO_AF_0);//sck
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource7, GPIO_AF_0);//mosi
+
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_Level_3;
+
+	GPIO_SetBits(GPIOA,GPIO_Pin_5);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_SetBits(GPIOA,GPIO_Pin_7);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	SPI_I2S_DeInit(SPI1);
+	SPI_InitStructure.SPI_Direction = SPI_Direction_1Line_Tx;
+	SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;
+	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
+	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
+	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
+	SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
+	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
+	SPI_InitStructure.SPI_CRCPolynomial = 7;
+
+	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;
+	SPI_Init(SPI1, &SPI_InitStructure);
+/*
+	SPI_RxFIFOThresholdConfig(SPI1, SPI_RxFIFOThreshold_QF);
+
+	NVIC_InitStructure.NVIC_IRQChannel = SPI1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	//SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_RXNE, ENABLE);
+	//SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_TXE, ENABLE);
+	SPI_I2S_ITConfig(SPI1, SPI_I2S_IT_ERR, ENABLE);
+*/
+	SPI_SSOutputCmd(SPI1,ENABLE);
+	SPI_Cmd(SPI1, ENABLE);
+	return 0;
+}
+INIT_BOARD_EXPORT(st7585_init);
+
 void rt_hw_console_output(const char *str)
 {   
 	rt_size_t i = 0, size = 0;
@@ -165,18 +233,18 @@ void rt_hw_console_output(const char *str)
 	{
 		if (*(str + i) == '\n')
 		{
-			USART_SendData(USART1, a);
-			while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
+			USART_SendData(USART2, a);
+			while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET); 
 		}
-		USART_SendData(USART1, *(uint8_t *)(str + i));
-		while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
+		USART_SendData(USART2, *(uint8_t *)(str + i));
+		while(USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET); 
 	}
 }
 
 char rt_hw_console_getchar(void)
 {
 	int8_t ch = -1;
-	if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
-		ch = USART_ReceiveData(USART1) & 0xff;
+	if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == SET)
+		ch = USART_ReceiveData(USART2) & 0xff;
 	return ch;
 }
